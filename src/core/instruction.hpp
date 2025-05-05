@@ -36,7 +36,6 @@ enum class mnemonic {
   DEC,
   DEX,
   DEY,
-  DOP,
   EOR,
   INC,
   INX,
@@ -81,7 +80,6 @@ enum class mnemonic {
   TAS,
   TAX,
   TAY,
-  TOP,
   TSX,
   TXA,
   TXS,
@@ -90,29 +88,35 @@ enum class mnemonic {
 };
 
 enum class address_mode {
-  a,
-  abs,
-  absx,
-  absy,
-  imd,
-  impl,
-  ind,
-  indx,
-  indy,
-  rel,
-  zpg,
-  zpgx,
-  zpgy,
+  ABSOLUTE,
+  ABSOLUTEX,
+  ABSOLUTEY,
+  ACCUMULATOR,
+  IMMEDIATE,
+  IMPLIED,
+  INDIRECT,
+  INDIRECTX,
+  INDIRECTY,
+  RELATIVE,
+  ZEROPAGE,
+  ZEROPAGEX,
+  ZEROPAGEY,
 };
 
 struct instruction {
-  const std::byte opcode;
-  const mnemonic op;
-  const address_mode mode;
-  const size_t length;
-  const size_t cycles;
-  const bool illegal;
+  const std::byte opcode = std::byte{0x80};
+  const mnemonic op = mnemonic::NOP;
+  const address_mode mode = address_mode::IMMEDIATE;
+  const size_t length = 2;
+  const size_t cycles = 2;
+  const bool illegal = true;
+};
+
+enum class address_boundary {
+  CROSSED,
+  SAME,
 };
 
 auto as_instruction(std::byte byte) -> instruction;
+auto cycles_with_penalty(const instruction &info, address_boundary page_relation) -> size_t;
 }; // namespace erelic
