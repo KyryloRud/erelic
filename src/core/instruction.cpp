@@ -8,6 +8,8 @@
 #include <iomanip>
 #include <tuple>
 
+#include "utility.hpp"
+
 namespace {
 using namespace erelic;
 
@@ -326,120 +328,120 @@ constexpr auto opcode_lookup_table = make_opcode_lookup_table();
 namespace erelic {
 auto operator<<(std::ostream &os, const mnemonic &m) -> std::ostream & {
   switch (m) {
-  case mnemonic::ADC: os << "ADC";
-  case mnemonic::ALR: os << "ALR";
-  case mnemonic::ANC: os << "ANC";
-  case mnemonic::AND: os << "AND";
-  case mnemonic::ANE: os << "ANE";
-  case mnemonic::ARR: os << "ARR";
-  case mnemonic::ASL: os << "ASL";
-  case mnemonic::BCC: os << "BCC";
-  case mnemonic::BCS: os << "BCS";
-  case mnemonic::BEQ: os << "BEQ";
-  case mnemonic::BIT: os << "BIT";
-  case mnemonic::BMI: os << "BMI";
-  case mnemonic::BNE: os << "BNE";
-  case mnemonic::BPL: os << "BPL";
-  case mnemonic::BRK: os << "BRK";
-  case mnemonic::BVC: os << "BVC";
-  case mnemonic::BVS: os << "BVS";
-  case mnemonic::CLC: os << "CLC";
-  case mnemonic::CLD: os << "CLD";
-  case mnemonic::CLI: os << "CLI";
-  case mnemonic::CLV: os << "CLV";
-  case mnemonic::CMP: os << "CMP";
-  case mnemonic::CPX: os << "CPX";
-  case mnemonic::CPY: os << "CPY";
-  case mnemonic::DCP: os << "DCP";
-  case mnemonic::DEC: os << "DEC";
-  case mnemonic::DEX: os << "DEX";
-  case mnemonic::DEY: os << "DEY";
-  case mnemonic::EOR: os << "EOR";
-  case mnemonic::INC: os << "INC";
-  case mnemonic::INX: os << "INX";
-  case mnemonic::INY: os << "INY";
-  case mnemonic::ISC: os << "ISC";
-  case mnemonic::JAM: os << "JAM";
-  case mnemonic::JMP: os << "JMP";
-  case mnemonic::JSR: os << "JSR";
-  case mnemonic::LAS: os << "LAS";
-  case mnemonic::LAX: os << "LAX";
-  case mnemonic::LDA: os << "LDA";
-  case mnemonic::LDX: os << "LDX";
-  case mnemonic::LDY: os << "LDY";
-  case mnemonic::LSR: os << "LSR";
-  case mnemonic::LXA: os << "LXA";
-  case mnemonic::NOP: os << "NOP";
-  case mnemonic::ORA: os << "ORA";
-  case mnemonic::PHA: os << "PHA";
-  case mnemonic::PHP: os << "PHP";
-  case mnemonic::PLA: os << "PLA";
-  case mnemonic::PLP: os << "PLP";
-  case mnemonic::RLA: os << "RLA";
-  case mnemonic::ROL: os << "ROL";
-  case mnemonic::ROR: os << "ROR";
-  case mnemonic::RRA: os << "RRA";
-  case mnemonic::RTI: os << "RTI";
-  case mnemonic::RTS: os << "RTS";
-  case mnemonic::SAX: os << "SAX";
-  case mnemonic::SBC: os << "SBC";
-  case mnemonic::SBX: os << "SBX";
-  case mnemonic::SEC: os << "SEC";
-  case mnemonic::SED: os << "SED";
-  case mnemonic::SEI: os << "SEI";
-  case mnemonic::SHA: os << "SHA";
-  case mnemonic::SHX: os << "SHX";
-  case mnemonic::SHY: os << "SHY";
-  case mnemonic::SLO: os << "SLO";
-  case mnemonic::SRE: os << "SRE";
-  case mnemonic::STA: os << "STA";
-  case mnemonic::STX: os << "STX";
-  case mnemonic::STY: os << "STY";
-  case mnemonic::TAS: os << "TAS";
-  case mnemonic::TAX: os << "TAX";
-  case mnemonic::TAY: os << "TAY";
-  case mnemonic::TSX: os << "TSX";
-  case mnemonic::TXA: os << "TXA";
-  case mnemonic::TXS: os << "TXS";
-  case mnemonic::TYA: os << "TYA";
+  case mnemonic::ADC: os << "ADC"; break;
+  case mnemonic::ALR: os << "ALR"; break;
+  case mnemonic::ANC: os << "ANC"; break;
+  case mnemonic::AND: os << "AND"; break;
+  case mnemonic::ANE: os << "ANE"; break;
+  case mnemonic::ARR: os << "ARR"; break;
+  case mnemonic::ASL: os << "ASL"; break;
+  case mnemonic::BCC: os << "BCC"; break;
+  case mnemonic::BCS: os << "BCS"; break;
+  case mnemonic::BEQ: os << "BEQ"; break;
+  case mnemonic::BIT: os << "BIT"; break;
+  case mnemonic::BMI: os << "BMI"; break;
+  case mnemonic::BNE: os << "BNE"; break;
+  case mnemonic::BPL: os << "BPL"; break;
+  case mnemonic::BRK: os << "BRK"; break;
+  case mnemonic::BVC: os << "BVC"; break;
+  case mnemonic::BVS: os << "BVS"; break;
+  case mnemonic::CLC: os << "CLC"; break;
+  case mnemonic::CLD: os << "CLD"; break;
+  case mnemonic::CLI: os << "CLI"; break;
+  case mnemonic::CLV: os << "CLV"; break;
+  case mnemonic::CMP: os << "CMP"; break;
+  case mnemonic::CPX: os << "CPX"; break;
+  case mnemonic::CPY: os << "CPY"; break;
+  case mnemonic::DCP: os << "DCP"; break;
+  case mnemonic::DEC: os << "DEC"; break;
+  case mnemonic::DEX: os << "DEX"; break;
+  case mnemonic::DEY: os << "DEY"; break;
+  case mnemonic::EOR: os << "EOR"; break;
+  case mnemonic::INC: os << "INC"; break;
+  case mnemonic::INX: os << "INX"; break;
+  case mnemonic::INY: os << "INY"; break;
+  case mnemonic::ISC: os << "ISC"; break;
+  case mnemonic::JAM: os << "JAM"; break;
+  case mnemonic::JMP: os << "JMP"; break;
+  case mnemonic::JSR: os << "JSR"; break;
+  case mnemonic::LAS: os << "LAS"; break;
+  case mnemonic::LAX: os << "LAX"; break;
+  case mnemonic::LDA: os << "LDA"; break;
+  case mnemonic::LDX: os << "LDX"; break;
+  case mnemonic::LDY: os << "LDY"; break;
+  case mnemonic::LSR: os << "LSR"; break;
+  case mnemonic::LXA: os << "LXA"; break;
+  case mnemonic::NOP: os << "NOP"; break;
+  case mnemonic::ORA: os << "ORA"; break;
+  case mnemonic::PHA: os << "PHA"; break;
+  case mnemonic::PHP: os << "PHP"; break;
+  case mnemonic::PLA: os << "PLA"; break;
+  case mnemonic::PLP: os << "PLP"; break;
+  case mnemonic::RLA: os << "RLA"; break;
+  case mnemonic::ROL: os << "ROL"; break;
+  case mnemonic::ROR: os << "ROR"; break;
+  case mnemonic::RRA: os << "RRA"; break;
+  case mnemonic::RTI: os << "RTI"; break;
+  case mnemonic::RTS: os << "RTS"; break;
+  case mnemonic::SAX: os << "SAX"; break;
+  case mnemonic::SBC: os << "SBC"; break;
+  case mnemonic::SBX: os << "SBX"; break;
+  case mnemonic::SEC: os << "SEC"; break;
+  case mnemonic::SED: os << "SED"; break;
+  case mnemonic::SEI: os << "SEI"; break;
+  case mnemonic::SHA: os << "SHA"; break;
+  case mnemonic::SHX: os << "SHX"; break;
+  case mnemonic::SHY: os << "SHY"; break;
+  case mnemonic::SLO: os << "SLO"; break;
+  case mnemonic::SRE: os << "SRE"; break;
+  case mnemonic::STA: os << "STA"; break;
+  case mnemonic::STX: os << "STX"; break;
+  case mnemonic::STY: os << "STY"; break;
+  case mnemonic::TAS: os << "TAS"; break;
+  case mnemonic::TAX: os << "TAX"; break;
+  case mnemonic::TAY: os << "TAY"; break;
+  case mnemonic::TSX: os << "TSX"; break;
+  case mnemonic::TXA: os << "TXA"; break;
+  case mnemonic::TXS: os << "TXS"; break;
+  case mnemonic::TYA: os << "TYA"; break;
   }
   return os;
 }
 
 auto operator<<(std::ostream &os, const address_mode &m) -> std::ostream & {
   switch (m) {
-  case address_mode::ABSL: os << "ABSL";
-  case address_mode::ABSX: os << "ABSX";
-  case address_mode::ABSY: os << "ABSY";
-  case address_mode::ACCU: os << "ACCU";
-  case address_mode::IMME: os << "IMME";
-  case address_mode::IMPL: os << "IMPL";
-  case address_mode::INDR: os << "INDR";
-  case address_mode::INDX: os << "INDX";
-  case address_mode::INDY: os << "INDY";
-  case address_mode::RELA: os << "RELA";
-  case address_mode::ZPAG: os << "ZPAG";
-  case address_mode::ZPAX: os << "ZPAX";
-  case address_mode::ZPAY: os << "ZPAY";
+  case address_mode::ABSL: os << "ABSL"; break;
+  case address_mode::ABSX: os << "ABSX"; break;
+  case address_mode::ABSY: os << "ABSY"; break;
+  case address_mode::ACCU: os << "ACCU"; break;
+  case address_mode::IMME: os << "IMME"; break;
+  case address_mode::IMPL: os << "IMPL"; break;
+  case address_mode::INDR: os << "INDR"; break;
+  case address_mode::INDX: os << "INDX"; break;
+  case address_mode::INDY: os << "INDY"; break;
+  case address_mode::RELA: os << "RELA"; break;
+  case address_mode::ZPAG: os << "ZPAG"; break;
+  case address_mode::ZPAX: os << "ZPAX"; break;
+  case address_mode::ZPAY: os << "ZPAY"; break;
   }
   return os;
 }
 
 auto operator<<(std::ostream &os, const instruction_set &s) -> std::ostream & {
   switch (s) {
-  case instruction_set::STND: os << "STND";
-  case instruction_set::NMOS: os << "NMOS";
+  case instruction_set::STND: os << "STND"; break;
+  case instruction_set::NMOS: os << "NMOS"; break;
   }
   return os;
 }
 
-auto instruction::operator<<(std::ostream &os) const -> std::ostream & {
-  os << op << '(';
-  os << std::hex << std::setw(2) << std::to_integer<std::uint8_t>(opcode) << ", mem=";
-  os << mode << ", len";
-  os << length << ", cycl=";
-  os << cycles << ", ";
-  os << set << ")";
+auto operator<<(std::ostream &os, const instruction &instruction) -> std::ostream & {
+  os << instruction.op << "(opc=";
+  os << instruction.opcode << ", mem=";
+  os << instruction.mode << ", len=";
+  os << instruction.length << ", cycl=";
+  os << instruction.cycles << ", set=";
+  os << instruction.set << ")";
   return os;
 }
 

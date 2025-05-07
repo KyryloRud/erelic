@@ -7,6 +7,8 @@ set(TARGET erelic-core)
 add_library(${TARGET} STATIC
    instruction.hpp
    instruction.cpp
+   utility.hpp
+   utility.cpp
 )
 target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

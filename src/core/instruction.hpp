@@ -122,9 +122,9 @@ public:
   const size_t length = 2;
   const size_t cycles = 2;
   const instruction_set set = instruction_set::STND;
-
-  auto operator<<(std::ostream &os) const -> std::ostream &;
 };
+
+auto operator<<(std::ostream &os, const instruction &instruction) -> std::ostream &;
 
 enum class address_boundary {
   CROSSED,
