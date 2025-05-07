@@ -13,7 +13,7 @@
 namespace {
 using namespace erelic;
 
-constexpr auto which_instruction_set(mnemonic op) -> instruction_set {
+constexpr auto which_instruction_set(mnemonic op, std::byte byte) -> instruction_set {
   switch (op) {
   case mnemonic::ALR: [[fallthrough]];
   case mnemonic::ANC: [[fallthrough]];
@@ -34,8 +34,9 @@ constexpr auto which_instruction_set(mnemonic op) -> instruction_set {
   case mnemonic::SHY: [[fallthrough]];
   case mnemonic::SLO: [[fallthrough]];
   case mnemonic::SRE: [[fallthrough]];
-  case mnemonic::TAS: [[fallthrough]];
-  case mnemonic::SBC: return instruction_set::NMOS;
+  case mnemonic::TAS: return instruction_set::NMOS;
+  case mnemonic::NOP: return std::byte{0xEA} == byte ? instruction_set::STND : instruction_set::NMOS;
+  case mnemonic::SBC: return std::byte{0xEB} == byte ? instruction_set::NMOS : instruction_set::STND;
   default: return instruction_set::STND;
   }
 }
@@ -323,6 +324,18 @@ constexpr auto make_opcode_lookup_table() -> lookup_table {
 }
 
 constexpr auto opcode_lookup_table = make_opcode_lookup_table();
+
+constexpr auto fetch_instruction(std::byte byte) -> instruction {
+  auto [op, mode, cycles] = opcode_lookup_table[std::to_integer<size_t>(byte)];
+  return {
+    .opcode = byte,
+    .op = op,
+    .mode = mode,
+    .length = instruction_length(mode),
+    .cycles = cycles,
+    .set = which_instruction_set(op, byte),
+  };
+}
 }; // namespace
 
 namespace erelic {
@@ -449,16 +462,15 @@ auto operator<<(std::ostream &os, const instruction &instruction) -> std::ostrea
   return os;
 }
 
-auto as_instruction(std::byte byte) -> instruction {
-  auto [op, mode, cycles] = opcode_lookup_table[std::to_integer<size_t>(byte)];
-  return {
-    .opcode = byte,
-    .op = op,
-    .mode = mode,
-    .length = instruction_length(mode),
-    .cycles = cycles,
-    .set = which_instruction_set(op),
-  };
+auto as_instruction(std::byte byte, instruction_set set) -> instruction {
+  auto instruction = fetch_instruction(byte);
+
+  if (set == instruction_set::STND && set != instruction.set) {
+    constexpr auto nop_instruction = fetch_instruction(std::byte{0xEA});
+    return nop_instruction;
+  }
+
+  return instruction;
 }
 
 auto cycles_with_penalty(const instruction &info, address_boundary page_relation) -> size_t {

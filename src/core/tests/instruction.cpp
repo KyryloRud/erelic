@@ -286,6 +286,6 @@ INSTANTIATE_TEST_SUITE_P(nmos, decode_instruction, testing::ValuesIn(instruction
 
 TEST_P(decode_instruction, as_instruction) {
   auto expected = GetParam();
-  auto actual = erelic::as_instruction(expected.opcode);
+  auto actual = erelic::as_instruction(expected.opcode, expected.set);
   EXPECT_EQ(expected, actual);
 }

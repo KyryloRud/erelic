@@ -133,6 +133,6 @@ enum class address_boundary {
   SAME,
 };
 
-auto as_instruction(std::byte byte) -> instruction;
+auto as_instruction(std::byte byte, instruction_set set) -> instruction;
 auto cycles_with_penalty(const instruction &info, address_boundary page_relation) -> size_t;
 }; // namespace erelic
