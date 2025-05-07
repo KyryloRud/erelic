@@ -4,8 +4,9 @@
 
 #include "instruction.hpp"
 
+#include <array>
 #include <iomanip>
-#include <unordered_map>
+#include <tuple>
 
 namespace {
 using namespace erelic;
@@ -55,137 +56,271 @@ constexpr auto instruction_length(address_mode mode) -> size_t {
   }
 }
 
-using instr_info = std::tuple<mnemonic, size_t /* cycles */, address_mode>;
-auto instructions_info = std::unordered_map<std::byte, instr_info>{
-  {std::byte{0x69}, {mnemonic::ADC, 2, address_mode::IMME}}, {std::byte{0x65}, {mnemonic::ADC, 3, address_mode::ZPAG}},
-  {std::byte{0x75}, {mnemonic::ADC, 4, address_mode::ZPAX}}, {std::byte{0x6D}, {mnemonic::ADC, 4, address_mode::ABSL}},
-  {std::byte{0x7D}, {mnemonic::ADC, 4, address_mode::ABSX}}, {std::byte{0x79}, {mnemonic::ADC, 4, address_mode::ABSY}},
-  {std::byte{0x61}, {mnemonic::ADC, 6, address_mode::INDX}}, {std::byte{0x71}, {mnemonic::ADC, 5, address_mode::INDY}},
-  {std::byte{0x29}, {mnemonic::AND, 2, address_mode::IMME}}, {std::byte{0x25}, {mnemonic::AND, 3, address_mode::ZPAG}},
-  {std::byte{0x35}, {mnemonic::AND, 4, address_mode::ZPAX}}, {std::byte{0x2D}, {mnemonic::AND, 4, address_mode::ABSL}},
-  {std::byte{0x3D}, {mnemonic::AND, 4, address_mode::ABSX}}, {std::byte{0x39}, {mnemonic::AND, 4, address_mode::ABSY}},
-  {std::byte{0x21}, {mnemonic::AND, 6, address_mode::INDX}}, {std::byte{0x31}, {mnemonic::AND, 5, address_mode::INDY}},
-  {std::byte{0x0A}, {mnemonic::ASL, 2, address_mode::ACCU}}, {std::byte{0x06}, {mnemonic::ASL, 5, address_mode::ZPAG}},
-  {std::byte{0x16}, {mnemonic::ASL, 6, address_mode::ZPAX}}, {std::byte{0x0E}, {mnemonic::ASL, 6, address_mode::ABSL}},
-  {std::byte{0x1E}, {mnemonic::ASL, 7, address_mode::ABSX}}, {std::byte{0x90}, {mnemonic::BCC, 2, address_mode::RELA}},
-  {std::byte{0xB0}, {mnemonic::BCS, 2, address_mode::RELA}}, {std::byte{0x1A}, {mnemonic::NOP, 2, address_mode::IMPL}},
-  {std::byte{0x3A}, {mnemonic::NOP, 2, address_mode::IMPL}}, {std::byte{0x5A}, {mnemonic::NOP, 2, address_mode::IMPL}},
-  {std::byte{0x7A}, {mnemonic::NOP, 2, address_mode::IMPL}}, {std::byte{0xDA}, {mnemonic::NOP, 2, address_mode::IMPL}},
-  {std::byte{0xFA}, {mnemonic::NOP, 2, address_mode::IMPL}}, {std::byte{0x80}, {mnemonic::NOP, 2, address_mode::IMME}},
-  {std::byte{0x82}, {mnemonic::NOP, 2, address_mode::IMME}}, {std::byte{0x89}, {mnemonic::NOP, 2, address_mode::IMME}},
-  {std::byte{0xC2}, {mnemonic::NOP, 2, address_mode::IMME}}, {std::byte{0xE2}, {mnemonic::NOP, 2, address_mode::IMME}},
-  {std::byte{0x04}, {mnemonic::NOP, 3, address_mode::ZPAG}}, {std::byte{0x44}, {mnemonic::NOP, 3, address_mode::ZPAG}},
-  {std::byte{0x64}, {mnemonic::NOP, 3, address_mode::ZPAG}}, {std::byte{0x14}, {mnemonic::NOP, 4, address_mode::ZPAX}},
-  {std::byte{0x34}, {mnemonic::NOP, 4, address_mode::ZPAX}}, {std::byte{0x54}, {mnemonic::NOP, 4, address_mode::ZPAX}},
-  {std::byte{0x74}, {mnemonic::NOP, 4, address_mode::ZPAX}}, {std::byte{0xD4}, {mnemonic::NOP, 4, address_mode::ZPAX}},
-  {std::byte{0xF4}, {mnemonic::NOP, 4, address_mode::ZPAX}}, {std::byte{0x0C}, {mnemonic::NOP, 4, address_mode::ABSL}},
-  {std::byte{0x1C}, {mnemonic::NOP, 4, address_mode::ABSX}}, {std::byte{0x3C}, {mnemonic::NOP, 4, address_mode::ABSX}},
-  {std::byte{0x5C}, {mnemonic::NOP, 4, address_mode::ABSX}}, {std::byte{0x7C}, {mnemonic::NOP, 4, address_mode::ABSX}},
-  {std::byte{0xDC}, {mnemonic::NOP, 4, address_mode::ABSX}}, {std::byte{0xFC}, {mnemonic::NOP, 4, address_mode::ABSX}},
-  {std::byte{0x02}, {mnemonic::JAM, 0, address_mode::ACCU}}, {std::byte{0x12}, {mnemonic::JAM, 0, address_mode::ACCU}},
-  {std::byte{0x22}, {mnemonic::JAM, 0, address_mode::ACCU}}, {std::byte{0x32}, {mnemonic::JAM, 0, address_mode::ACCU}},
-  {std::byte{0x42}, {mnemonic::JAM, 0, address_mode::ACCU}}, {std::byte{0x52}, {mnemonic::JAM, 0, address_mode::ACCU}},
-  {std::byte{0x62}, {mnemonic::JAM, 0, address_mode::ACCU}}, {std::byte{0x72}, {mnemonic::JAM, 0, address_mode::ACCU}},
-  {std::byte{0x92}, {mnemonic::JAM, 0, address_mode::ACCU}}, {std::byte{0xB2}, {mnemonic::JAM, 0, address_mode::ACCU}},
-  {std::byte{0xD2}, {mnemonic::JAM, 0, address_mode::ACCU}}, {std::byte{0xF2}, {mnemonic::JAM, 0, address_mode::ACCU}},
-  {std::byte{0xF0}, {mnemonic::BEQ, 2, address_mode::RELA}}, {std::byte{0x24}, {mnemonic::BIT, 3, address_mode::ZPAG}},
-  {std::byte{0x2C}, {mnemonic::BIT, 4, address_mode::ABSL}}, {std::byte{0x30}, {mnemonic::BMI, 2, address_mode::RELA}},
-  {std::byte{0xD0}, {mnemonic::BNE, 2, address_mode::RELA}}, {std::byte{0x10}, {mnemonic::BPL, 2, address_mode::RELA}},
-  {std::byte{0x00}, {mnemonic::BRK, 7, address_mode::IMPL}}, {std::byte{0x50}, {mnemonic::BVC, 2, address_mode::RELA}},
-  {std::byte{0x70}, {mnemonic::BVS, 2, address_mode::RELA}}, {std::byte{0x18}, {mnemonic::CLC, 2, address_mode::IMPL}},
-  {std::byte{0xD8}, {mnemonic::CLD, 2, address_mode::IMPL}}, {std::byte{0x58}, {mnemonic::CLI, 2, address_mode::IMPL}},
-  {std::byte{0xB8}, {mnemonic::CLV, 2, address_mode::IMPL}}, {std::byte{0xC9}, {mnemonic::CMP, 2, address_mode::IMME}},
-  {std::byte{0xC5}, {mnemonic::CMP, 3, address_mode::ZPAG}}, {std::byte{0xD5}, {mnemonic::CMP, 4, address_mode::ZPAX}},
-  {std::byte{0xCD}, {mnemonic::CMP, 4, address_mode::ABSL}}, {std::byte{0xDD}, {mnemonic::CMP, 4, address_mode::ABSX}},
-  {std::byte{0xD9}, {mnemonic::CMP, 4, address_mode::ABSY}}, {std::byte{0xC1}, {mnemonic::CMP, 6, address_mode::INDX}},
-  {std::byte{0xD1}, {mnemonic::CMP, 5, address_mode::INDY}}, {std::byte{0xE0}, {mnemonic::CPX, 2, address_mode::IMME}},
-  {std::byte{0xE4}, {mnemonic::CPX, 3, address_mode::ZPAG}}, {std::byte{0xEC}, {mnemonic::CPX, 4, address_mode::ABSL}},
-  {std::byte{0xC0}, {mnemonic::CPY, 2, address_mode::IMME}}, {std::byte{0xC4}, {mnemonic::CPY, 3, address_mode::ZPAG}},
-  {std::byte{0xCC}, {mnemonic::CPY, 4, address_mode::ABSL}}, {std::byte{0xC6}, {mnemonic::DEC, 5, address_mode::ZPAG}},
-  {std::byte{0xD6}, {mnemonic::DEC, 6, address_mode::ZPAX}}, {std::byte{0xCE}, {mnemonic::DEC, 6, address_mode::ABSL}},
-  {std::byte{0xDE}, {mnemonic::DEC, 7, address_mode::ABSX}}, {std::byte{0xCA}, {mnemonic::DEX, 2, address_mode::IMPL}},
-  {std::byte{0x88}, {mnemonic::DEY, 2, address_mode::IMPL}}, {std::byte{0x49}, {mnemonic::EOR, 2, address_mode::IMME}},
-  {std::byte{0x45}, {mnemonic::EOR, 3, address_mode::ZPAG}}, {std::byte{0x55}, {mnemonic::EOR, 4, address_mode::ZPAX}},
-  {std::byte{0x4D}, {mnemonic::EOR, 4, address_mode::ABSL}}, {std::byte{0x5D}, {mnemonic::EOR, 4, address_mode::ABSX}},
-  {std::byte{0x59}, {mnemonic::EOR, 4, address_mode::ABSY}}, {std::byte{0x41}, {mnemonic::EOR, 6, address_mode::INDX}},
-  {std::byte{0x51}, {mnemonic::EOR, 5, address_mode::INDY}}, {std::byte{0xE6}, {mnemonic::INC, 5, address_mode::ZPAG}},
-  {std::byte{0xF6}, {mnemonic::INC, 6, address_mode::ZPAX}}, {std::byte{0xEE}, {mnemonic::INC, 6, address_mode::ABSL}},
-  {std::byte{0xFE}, {mnemonic::INC, 7, address_mode::ABSX}}, {std::byte{0xE8}, {mnemonic::INX, 2, address_mode::IMPL}},
-  {std::byte{0xC8}, {mnemonic::INY, 2, address_mode::IMPL}}, {std::byte{0x4C}, {mnemonic::JMP, 3, address_mode::ABSL}},
-  {std::byte{0x6C}, {mnemonic::JMP, 5, address_mode::INDR}}, {std::byte{0x20}, {mnemonic::JSR, 6, address_mode::ABSL}},
-  {std::byte{0xA9}, {mnemonic::LDA, 2, address_mode::IMME}}, {std::byte{0xA5}, {mnemonic::LDA, 3, address_mode::ZPAG}},
-  {std::byte{0xB5}, {mnemonic::LDA, 4, address_mode::ZPAX}}, {std::byte{0xAD}, {mnemonic::LDA, 4, address_mode::ABSL}},
-  {std::byte{0xBD}, {mnemonic::LDA, 4, address_mode::ABSX}}, {std::byte{0xB9}, {mnemonic::LDA, 4, address_mode::ABSY}},
-  {std::byte{0xA1}, {mnemonic::LDA, 6, address_mode::INDX}}, {std::byte{0xB1}, {mnemonic::LDA, 5, address_mode::INDY}},
-  {std::byte{0xA2}, {mnemonic::LDX, 2, address_mode::IMME}}, {std::byte{0xA6}, {mnemonic::LDX, 3, address_mode::ZPAG}},
-  {std::byte{0xB6}, {mnemonic::LDX, 4, address_mode::ZPAY}}, {std::byte{0xAE}, {mnemonic::LDX, 4, address_mode::ABSL}},
-  {std::byte{0xBE}, {mnemonic::LDX, 4, address_mode::ABSY}}, {std::byte{0xA0}, {mnemonic::LDY, 2, address_mode::IMME}},
-  {std::byte{0xA4}, {mnemonic::LDY, 3, address_mode::ZPAG}}, {std::byte{0xB4}, {mnemonic::LDY, 4, address_mode::ZPAX}},
-  {std::byte{0xAC}, {mnemonic::LDY, 4, address_mode::ABSL}}, {std::byte{0xBC}, {mnemonic::LDY, 4, address_mode::ABSX}},
-  {std::byte{0x4A}, {mnemonic::LSR, 2, address_mode::ACCU}}, {std::byte{0x46}, {mnemonic::LSR, 5, address_mode::ZPAG}},
-  {std::byte{0x56}, {mnemonic::LSR, 6, address_mode::ZPAX}}, {std::byte{0x4E}, {mnemonic::LSR, 6, address_mode::ABSL}},
-  {std::byte{0x5E}, {mnemonic::LSR, 7, address_mode::ABSX}}, {std::byte{0xEA}, {mnemonic::NOP, 2, address_mode::IMPL}},
-  {std::byte{0x09}, {mnemonic::ORA, 2, address_mode::IMME}}, {std::byte{0x05}, {mnemonic::ORA, 3, address_mode::ZPAG}},
-  {std::byte{0x15}, {mnemonic::ORA, 4, address_mode::ZPAX}}, {std::byte{0x0D}, {mnemonic::ORA, 4, address_mode::ABSL}},
-  {std::byte{0x1D}, {mnemonic::ORA, 4, address_mode::ABSX}}, {std::byte{0x19}, {mnemonic::ORA, 4, address_mode::ABSY}},
-  {std::byte{0x01}, {mnemonic::ORA, 6, address_mode::INDX}}, {std::byte{0x11}, {mnemonic::ORA, 5, address_mode::INDY}},
-  {std::byte{0x48}, {mnemonic::PHA, 3, address_mode::IMPL}}, {std::byte{0x08}, {mnemonic::PHP, 3, address_mode::IMPL}},
-  {std::byte{0x68}, {mnemonic::PLA, 4, address_mode::IMPL}}, {std::byte{0x28}, {mnemonic::PLP, 4, address_mode::IMPL}},
-  {std::byte{0x2A}, {mnemonic::ROL, 2, address_mode::ACCU}}, {std::byte{0x26}, {mnemonic::ROL, 5, address_mode::ZPAG}},
-  {std::byte{0x36}, {mnemonic::ROL, 6, address_mode::ZPAX}}, {std::byte{0x2E}, {mnemonic::ROL, 6, address_mode::ABSL}},
-  {std::byte{0x3E}, {mnemonic::ROL, 7, address_mode::ABSX}}, {std::byte{0x6A}, {mnemonic::ROR, 2, address_mode::ACCU}},
-  {std::byte{0x66}, {mnemonic::ROR, 5, address_mode::ZPAG}}, {std::byte{0x76}, {mnemonic::ROR, 6, address_mode::ZPAX}},
-  {std::byte{0x6E}, {mnemonic::ROR, 6, address_mode::ABSL}}, {std::byte{0x7E}, {mnemonic::ROR, 7, address_mode::ABSX}},
-  {std::byte{0x40}, {mnemonic::RTI, 6, address_mode::IMPL}}, {std::byte{0x60}, {mnemonic::RTS, 6, address_mode::IMPL}},
-  {std::byte{0xE9}, {mnemonic::SBC, 2, address_mode::IMME}}, {std::byte{0xE5}, {mnemonic::SBC, 3, address_mode::ZPAG}},
-  {std::byte{0xF5}, {mnemonic::SBC, 4, address_mode::ZPAX}}, {std::byte{0xED}, {mnemonic::SBC, 4, address_mode::ABSL}},
-  {std::byte{0xFD}, {mnemonic::SBC, 4, address_mode::ABSX}}, {std::byte{0xF9}, {mnemonic::SBC, 4, address_mode::ABSY}},
-  {std::byte{0xE1}, {mnemonic::SBC, 6, address_mode::INDX}}, {std::byte{0xF1}, {mnemonic::SBC, 5, address_mode::INDY}},
-  {std::byte{0x38}, {mnemonic::SEC, 2, address_mode::IMPL}}, {std::byte{0xF8}, {mnemonic::SED, 2, address_mode::IMPL}},
-  {std::byte{0x78}, {mnemonic::SEI, 2, address_mode::IMPL}}, {std::byte{0x85}, {mnemonic::STA, 3, address_mode::ZPAG}},
-  {std::byte{0x95}, {mnemonic::STA, 4, address_mode::ZPAX}}, {std::byte{0x8D}, {mnemonic::STA, 4, address_mode::ABSL}},
-  {std::byte{0x9D}, {mnemonic::STA, 5, address_mode::ABSX}}, {std::byte{0x99}, {mnemonic::STA, 5, address_mode::ABSY}},
-  {std::byte{0x81}, {mnemonic::STA, 6, address_mode::INDX}}, {std::byte{0x91}, {mnemonic::STA, 6, address_mode::INDY}},
-  {std::byte{0x86}, {mnemonic::STX, 3, address_mode::ZPAG}}, {std::byte{0x96}, {mnemonic::STX, 4, address_mode::ZPAY}},
-  {std::byte{0x8E}, {mnemonic::STX, 4, address_mode::ABSL}}, {std::byte{0x84}, {mnemonic::STY, 3, address_mode::ZPAG}},
-  {std::byte{0x94}, {mnemonic::STY, 4, address_mode::ZPAX}}, {std::byte{0x8C}, {mnemonic::STY, 4, address_mode::ABSL}},
-  {std::byte{0xAA}, {mnemonic::TAX, 2, address_mode::IMPL}}, {std::byte{0xA8}, {mnemonic::TAY, 2, address_mode::IMPL}},
-  {std::byte{0xBA}, {mnemonic::TSX, 2, address_mode::IMPL}}, {std::byte{0x8A}, {mnemonic::TXA, 2, address_mode::IMPL}},
-  {std::byte{0x9A}, {mnemonic::TXS, 2, address_mode::IMPL}}, {std::byte{0x98}, {mnemonic::TYA, 2, address_mode::IMPL}},
-  {std::byte{0x4B}, {mnemonic::ALR, 2, address_mode::IMME}}, {std::byte{0x0B}, {mnemonic::ANC, 2, address_mode::IMME}},
-  {std::byte{0x2B}, {mnemonic::ANC, 2, address_mode::IMME}}, {std::byte{0x8B}, {mnemonic::ANE, 2, address_mode::IMME}},
-  {std::byte{0x6B}, {mnemonic::ARR, 2, address_mode::IMME}}, {std::byte{0xC7}, {mnemonic::DCP, 5, address_mode::ZPAG}},
-  {std::byte{0xD7}, {mnemonic::DCP, 6, address_mode::ZPAX}}, {std::byte{0xCF}, {mnemonic::DCP, 6, address_mode::ABSL}},
-  {std::byte{0xDF}, {mnemonic::DCP, 7, address_mode::ABSX}}, {std::byte{0xDB}, {mnemonic::DCP, 7, address_mode::ABSY}},
-  {std::byte{0xC3}, {mnemonic::DCP, 8, address_mode::INDX}}, {std::byte{0xD3}, {mnemonic::DCP, 8, address_mode::INDY}},
-  {std::byte{0xE7}, {mnemonic::ISC, 5, address_mode::ZPAG}}, {std::byte{0xF7}, {mnemonic::ISC, 6, address_mode::ZPAX}},
-  {std::byte{0xEF}, {mnemonic::ISC, 6, address_mode::ABSL}}, {std::byte{0xFF}, {mnemonic::ISC, 7, address_mode::ABSX}},
-  {std::byte{0xFB}, {mnemonic::ISC, 7, address_mode::ABSY}}, {std::byte{0xE3}, {mnemonic::ISC, 8, address_mode::INDX}},
-  {std::byte{0xF3}, {mnemonic::ISC, 8, address_mode::INDY}}, {std::byte{0xBB}, {mnemonic::LAS, 4, address_mode::ABSY}},
-  {std::byte{0xA7}, {mnemonic::LAX, 3, address_mode::ZPAG}}, {std::byte{0xB7}, {mnemonic::LAX, 4, address_mode::ZPAY}},
-  {std::byte{0xAF}, {mnemonic::LAX, 4, address_mode::ABSL}}, {std::byte{0xBF}, {mnemonic::LAX, 4, address_mode::ABSY}},
-  {std::byte{0xA3}, {mnemonic::LAX, 6, address_mode::INDX}}, {std::byte{0xB3}, {mnemonic::LAX, 5, address_mode::INDY}},
-  {std::byte{0xAB}, {mnemonic::LXA, 2, address_mode::IMME}}, {std::byte{0x27}, {mnemonic::RLA, 5, address_mode::ZPAG}},
-  {std::byte{0x37}, {mnemonic::RLA, 6, address_mode::ZPAX}}, {std::byte{0x2F}, {mnemonic::RLA, 6, address_mode::ABSL}},
-  {std::byte{0x3F}, {mnemonic::RLA, 7, address_mode::ABSX}}, {std::byte{0x3B}, {mnemonic::RLA, 7, address_mode::ABSY}},
-  {std::byte{0x23}, {mnemonic::RLA, 8, address_mode::INDX}}, {std::byte{0x33}, {mnemonic::RLA, 8, address_mode::INDY}},
-  {std::byte{0x67}, {mnemonic::RRA, 5, address_mode::ZPAG}}, {std::byte{0x77}, {mnemonic::RRA, 6, address_mode::ZPAX}},
-  {std::byte{0x6F}, {mnemonic::RRA, 6, address_mode::ABSL}}, {std::byte{0x7F}, {mnemonic::RRA, 7, address_mode::ABSX}},
-  {std::byte{0x7B}, {mnemonic::RRA, 7, address_mode::ABSY}}, {std::byte{0x63}, {mnemonic::RRA, 8, address_mode::INDX}},
-  {std::byte{0x73}, {mnemonic::RRA, 8, address_mode::INDY}}, {std::byte{0x87}, {mnemonic::SAX, 3, address_mode::ZPAG}},
-  {std::byte{0x97}, {mnemonic::SAX, 4, address_mode::ZPAY}}, {std::byte{0x8F}, {mnemonic::SAX, 4, address_mode::ABSL}},
-  {std::byte{0x83}, {mnemonic::SAX, 6, address_mode::INDX}}, {std::byte{0xCB}, {mnemonic::SBX, 2, address_mode::IMME}},
-  {std::byte{0x9F}, {mnemonic::SHA, 5, address_mode::ABSY}}, {std::byte{0x93}, {mnemonic::SHA, 6, address_mode::INDY}},
-  {std::byte{0x9E}, {mnemonic::SHX, 5, address_mode::ABSY}}, {std::byte{0x9C}, {mnemonic::SHY, 5, address_mode::ABSX}},
-  {std::byte{0x07}, {mnemonic::SLO, 5, address_mode::ZPAG}}, {std::byte{0x17}, {mnemonic::SLO, 6, address_mode::ZPAX}},
-  {std::byte{0x0F}, {mnemonic::SLO, 6, address_mode::ABSL}}, {std::byte{0x1F}, {mnemonic::SLO, 7, address_mode::ABSX}},
-  {std::byte{0x1B}, {mnemonic::SLO, 7, address_mode::ABSY}}, {std::byte{0x03}, {mnemonic::SLO, 8, address_mode::INDX}},
-  {std::byte{0x13}, {mnemonic::SLO, 8, address_mode::INDY}}, {std::byte{0x47}, {mnemonic::SRE, 5, address_mode::ZPAG}},
-  {std::byte{0x57}, {mnemonic::SRE, 6, address_mode::ZPAX}}, {std::byte{0x4F}, {mnemonic::SRE, 6, address_mode::ABSL}},
-  {std::byte{0x5F}, {mnemonic::SRE, 7, address_mode::ABSX}}, {std::byte{0x5B}, {mnemonic::SRE, 7, address_mode::ABSY}},
-  {std::byte{0x43}, {mnemonic::SRE, 8, address_mode::INDX}}, {std::byte{0x53}, {mnemonic::SRE, 8, address_mode::INDY}},
-  {std::byte{0x9B}, {mnemonic::TAS, 5, address_mode::ABSY}},
-};
+using instr_info = std::tuple<mnemonic, address_mode, size_t /* cycles */>;
+using lookup_table = std::array<instr_info, 256>;
+
+constexpr auto make_opcode_lookup_table() -> lookup_table {
+  auto table = lookup_table{};
+  table[0x69] = {mnemonic::ADC, address_mode::IMME, 2};
+  table[0x65] = {mnemonic::ADC, address_mode::ZPAG, 3};
+  table[0x75] = {mnemonic::ADC, address_mode::ZPAX, 4};
+  table[0x6D] = {mnemonic::ADC, address_mode::ABSL, 4};
+  table[0x7D] = {mnemonic::ADC, address_mode::ABSX, 4};
+  table[0x79] = {mnemonic::ADC, address_mode::ABSY, 4};
+  table[0x61] = {mnemonic::ADC, address_mode::INDX, 6};
+  table[0x71] = {mnemonic::ADC, address_mode::INDY, 5};
+  table[0x29] = {mnemonic::AND, address_mode::IMME, 2};
+  table[0x25] = {mnemonic::AND, address_mode::ZPAG, 3};
+  table[0x35] = {mnemonic::AND, address_mode::ZPAX, 4};
+  table[0x2D] = {mnemonic::AND, address_mode::ABSL, 4};
+  table[0x3D] = {mnemonic::AND, address_mode::ABSX, 4};
+  table[0x39] = {mnemonic::AND, address_mode::ABSY, 4};
+  table[0x21] = {mnemonic::AND, address_mode::INDX, 6};
+  table[0x31] = {mnemonic::AND, address_mode::INDY, 5};
+  table[0x0A] = {mnemonic::ASL, address_mode::ACCU, 2};
+  table[0x06] = {mnemonic::ASL, address_mode::ZPAG, 5};
+  table[0x16] = {mnemonic::ASL, address_mode::ZPAX, 6};
+  table[0x0E] = {mnemonic::ASL, address_mode::ABSL, 6};
+  table[0x1E] = {mnemonic::ASL, address_mode::ABSX, 7};
+  table[0x90] = {mnemonic::BCC, address_mode::RELA, 2};
+  table[0xB0] = {mnemonic::BCS, address_mode::RELA, 2};
+  table[0x1A] = {mnemonic::NOP, address_mode::IMPL, 2};
+  table[0x3A] = {mnemonic::NOP, address_mode::IMPL, 2};
+  table[0x5A] = {mnemonic::NOP, address_mode::IMPL, 2};
+  table[0x7A] = {mnemonic::NOP, address_mode::IMPL, 2};
+  table[0xDA] = {mnemonic::NOP, address_mode::IMPL, 2};
+  table[0xFA] = {mnemonic::NOP, address_mode::IMPL, 2};
+  table[0x80] = {mnemonic::NOP, address_mode::IMME, 2};
+  table[0x82] = {mnemonic::NOP, address_mode::IMME, 2};
+  table[0x89] = {mnemonic::NOP, address_mode::IMME, 2};
+  table[0xC2] = {mnemonic::NOP, address_mode::IMME, 2};
+  table[0xE2] = {mnemonic::NOP, address_mode::IMME, 2};
+  table[0x04] = {mnemonic::NOP, address_mode::ZPAG, 3};
+  table[0x44] = {mnemonic::NOP, address_mode::ZPAG, 3};
+  table[0x64] = {mnemonic::NOP, address_mode::ZPAG, 3};
+  table[0x14] = {mnemonic::NOP, address_mode::ZPAX, 4};
+  table[0x34] = {mnemonic::NOP, address_mode::ZPAX, 4};
+  table[0x54] = {mnemonic::NOP, address_mode::ZPAX, 4};
+  table[0x74] = {mnemonic::NOP, address_mode::ZPAX, 4};
+  table[0xD4] = {mnemonic::NOP, address_mode::ZPAX, 4};
+  table[0xF4] = {mnemonic::NOP, address_mode::ZPAX, 4};
+  table[0x0C] = {mnemonic::NOP, address_mode::ABSL, 4};
+  table[0x1C] = {mnemonic::NOP, address_mode::ABSX, 4};
+  table[0x3C] = {mnemonic::NOP, address_mode::ABSX, 4};
+  table[0x5C] = {mnemonic::NOP, address_mode::ABSX, 4};
+  table[0x7C] = {mnemonic::NOP, address_mode::ABSX, 4};
+  table[0xDC] = {mnemonic::NOP, address_mode::ABSX, 4};
+  table[0xFC] = {mnemonic::NOP, address_mode::ABSX, 4};
+  table[0x02] = {mnemonic::JAM, address_mode::ACCU, 0};
+  table[0x12] = {mnemonic::JAM, address_mode::ACCU, 0};
+  table[0x22] = {mnemonic::JAM, address_mode::ACCU, 0};
+  table[0x32] = {mnemonic::JAM, address_mode::ACCU, 0};
+  table[0x42] = {mnemonic::JAM, address_mode::ACCU, 0};
+  table[0x52] = {mnemonic::JAM, address_mode::ACCU, 0};
+  table[0x62] = {mnemonic::JAM, address_mode::ACCU, 0};
+  table[0x72] = {mnemonic::JAM, address_mode::ACCU, 0};
+  table[0x92] = {mnemonic::JAM, address_mode::ACCU, 0};
+  table[0xB2] = {mnemonic::JAM, address_mode::ACCU, 0};
+  table[0xD2] = {mnemonic::JAM, address_mode::ACCU, 0};
+  table[0xF2] = {mnemonic::JAM, address_mode::ACCU, 0};
+  table[0xF0] = {mnemonic::BEQ, address_mode::RELA, 2};
+  table[0x24] = {mnemonic::BIT, address_mode::ZPAG, 3};
+  table[0x2C] = {mnemonic::BIT, address_mode::ABSL, 4};
+  table[0x30] = {mnemonic::BMI, address_mode::RELA, 2};
+  table[0xD0] = {mnemonic::BNE, address_mode::RELA, 2};
+  table[0x10] = {mnemonic::BPL, address_mode::RELA, 2};
+  table[0x00] = {mnemonic::BRK, address_mode::IMPL, 7};
+  table[0x50] = {mnemonic::BVC, address_mode::RELA, 2};
+  table[0x70] = {mnemonic::BVS, address_mode::RELA, 2};
+  table[0x18] = {mnemonic::CLC, address_mode::IMPL, 2};
+  table[0xD8] = {mnemonic::CLD, address_mode::IMPL, 2};
+  table[0x58] = {mnemonic::CLI, address_mode::IMPL, 2};
+  table[0xB8] = {mnemonic::CLV, address_mode::IMPL, 2};
+  table[0xC9] = {mnemonic::CMP, address_mode::IMME, 2};
+  table[0xC5] = {mnemonic::CMP, address_mode::ZPAG, 3};
+  table[0xD5] = {mnemonic::CMP, address_mode::ZPAX, 4};
+  table[0xCD] = {mnemonic::CMP, address_mode::ABSL, 4};
+  table[0xDD] = {mnemonic::CMP, address_mode::ABSX, 4};
+  table[0xD9] = {mnemonic::CMP, address_mode::ABSY, 4};
+  table[0xC1] = {mnemonic::CMP, address_mode::INDX, 6};
+  table[0xD1] = {mnemonic::CMP, address_mode::INDY, 5};
+  table[0xE0] = {mnemonic::CPX, address_mode::IMME, 2};
+  table[0xE4] = {mnemonic::CPX, address_mode::ZPAG, 3};
+  table[0xEC] = {mnemonic::CPX, address_mode::ABSL, 4};
+  table[0xC0] = {mnemonic::CPY, address_mode::IMME, 2};
+  table[0xC4] = {mnemonic::CPY, address_mode::ZPAG, 3};
+  table[0xCC] = {mnemonic::CPY, address_mode::ABSL, 4};
+  table[0xC6] = {mnemonic::DEC, address_mode::ZPAG, 5};
+  table[0xD6] = {mnemonic::DEC, address_mode::ZPAX, 6};
+  table[0xCE] = {mnemonic::DEC, address_mode::ABSL, 6};
+  table[0xDE] = {mnemonic::DEC, address_mode::ABSX, 7};
+  table[0xCA] = {mnemonic::DEX, address_mode::IMPL, 2};
+  table[0x88] = {mnemonic::DEY, address_mode::IMPL, 2};
+  table[0x49] = {mnemonic::EOR, address_mode::IMME, 2};
+  table[0x45] = {mnemonic::EOR, address_mode::ZPAG, 3};
+  table[0x55] = {mnemonic::EOR, address_mode::ZPAX, 4};
+  table[0x4D] = {mnemonic::EOR, address_mode::ABSL, 4};
+  table[0x5D] = {mnemonic::EOR, address_mode::ABSX, 4};
+  table[0x59] = {mnemonic::EOR, address_mode::ABSY, 4};
+  table[0x41] = {mnemonic::EOR, address_mode::INDX, 6};
+  table[0x51] = {mnemonic::EOR, address_mode::INDY, 5};
+  table[0xE6] = {mnemonic::INC, address_mode::ZPAG, 5};
+  table[0xF6] = {mnemonic::INC, address_mode::ZPAX, 6};
+  table[0xEE] = {mnemonic::INC, address_mode::ABSL, 6};
+  table[0xFE] = {mnemonic::INC, address_mode::ABSX, 7};
+  table[0xE8] = {mnemonic::INX, address_mode::IMPL, 2};
+  table[0xC8] = {mnemonic::INY, address_mode::IMPL, 2};
+  table[0x4C] = {mnemonic::JMP, address_mode::ABSL, 3};
+  table[0x6C] = {mnemonic::JMP, address_mode::INDR, 5};
+  table[0x20] = {mnemonic::JSR, address_mode::ABSL, 6};
+  table[0xA9] = {mnemonic::LDA, address_mode::IMME, 2};
+  table[0xA5] = {mnemonic::LDA, address_mode::ZPAG, 3};
+  table[0xB5] = {mnemonic::LDA, address_mode::ZPAX, 4};
+  table[0xAD] = {mnemonic::LDA, address_mode::ABSL, 4};
+  table[0xBD] = {mnemonic::LDA, address_mode::ABSX, 4};
+  table[0xB9] = {mnemonic::LDA, address_mode::ABSY, 4};
+  table[0xA1] = {mnemonic::LDA, address_mode::INDX, 6};
+  table[0xB1] = {mnemonic::LDA, address_mode::INDY, 5};
+  table[0xA2] = {mnemonic::LDX, address_mode::IMME, 2};
+  table[0xA6] = {mnemonic::LDX, address_mode::ZPAG, 3};
+  table[0xB6] = {mnemonic::LDX, address_mode::ZPAY, 4};
+  table[0xAE] = {mnemonic::LDX, address_mode::ABSL, 4};
+  table[0xBE] = {mnemonic::LDX, address_mode::ABSY, 4};
+  table[0xA0] = {mnemonic::LDY, address_mode::IMME, 2};
+  table[0xA4] = {mnemonic::LDY, address_mode::ZPAG, 3};
+  table[0xB4] = {mnemonic::LDY, address_mode::ZPAX, 4};
+  table[0xAC] = {mnemonic::LDY, address_mode::ABSL, 4};
+  table[0xBC] = {mnemonic::LDY, address_mode::ABSX, 4};
+  table[0x4A] = {mnemonic::LSR, address_mode::ACCU, 2};
+  table[0x46] = {mnemonic::LSR, address_mode::ZPAG, 5};
+  table[0x56] = {mnemonic::LSR, address_mode::ZPAX, 6};
+  table[0x4E] = {mnemonic::LSR, address_mode::ABSL, 6};
+  table[0x5E] = {mnemonic::LSR, address_mode::ABSX, 7};
+  table[0xEA] = {mnemonic::NOP, address_mode::IMPL, 2};
+  table[0x09] = {mnemonic::ORA, address_mode::IMME, 2};
+  table[0x05] = {mnemonic::ORA, address_mode::ZPAG, 3};
+  table[0x15] = {mnemonic::ORA, address_mode::ZPAX, 4};
+  table[0x0D] = {mnemonic::ORA, address_mode::ABSL, 4};
+  table[0x1D] = {mnemonic::ORA, address_mode::ABSX, 4};
+  table[0x19] = {mnemonic::ORA, address_mode::ABSY, 4};
+  table[0x01] = {mnemonic::ORA, address_mode::INDX, 6};
+  table[0x11] = {mnemonic::ORA, address_mode::INDY, 5};
+  table[0x48] = {mnemonic::PHA, address_mode::IMPL, 3};
+  table[0x08] = {mnemonic::PHP, address_mode::IMPL, 3};
+  table[0x68] = {mnemonic::PLA, address_mode::IMPL, 4};
+  table[0x28] = {mnemonic::PLP, address_mode::IMPL, 4};
+  table[0x2A] = {mnemonic::ROL, address_mode::ACCU, 2};
+  table[0x26] = {mnemonic::ROL, address_mode::ZPAG, 5};
+  table[0x36] = {mnemonic::ROL, address_mode::ZPAX, 6};
+  table[0x2E] = {mnemonic::ROL, address_mode::ABSL, 6};
+  table[0x3E] = {mnemonic::ROL, address_mode::ABSX, 7};
+  table[0x6A] = {mnemonic::ROR, address_mode::ACCU, 2};
+  table[0x66] = {mnemonic::ROR, address_mode::ZPAG, 5};
+  table[0x76] = {mnemonic::ROR, address_mode::ZPAX, 6};
+  table[0x6E] = {mnemonic::ROR, address_mode::ABSL, 6};
+  table[0x7E] = {mnemonic::ROR, address_mode::ABSX, 7};
+  table[0x40] = {mnemonic::RTI, address_mode::IMPL, 6};
+  table[0x60] = {mnemonic::RTS, address_mode::IMPL, 6};
+  table[0xE9] = {mnemonic::SBC, address_mode::IMME, 2};
+  table[0xE5] = {mnemonic::SBC, address_mode::ZPAG, 3};
+  table[0xF5] = {mnemonic::SBC, address_mode::ZPAX, 4};
+  table[0xED] = {mnemonic::SBC, address_mode::ABSL, 4};
+  table[0xFD] = {mnemonic::SBC, address_mode::ABSX, 4};
+  table[0xF9] = {mnemonic::SBC, address_mode::ABSY, 4};
+  table[0xE1] = {mnemonic::SBC, address_mode::INDX, 6};
+  table[0xEB] = {mnemonic::SBC, address_mode::IMME, 2};
+  table[0xF1] = {mnemonic::SBC, address_mode::INDY, 5};
+  table[0x38] = {mnemonic::SEC, address_mode::IMPL, 2};
+  table[0xF8] = {mnemonic::SED, address_mode::IMPL, 2};
+  table[0x78] = {mnemonic::SEI, address_mode::IMPL, 2};
+  table[0x85] = {mnemonic::STA, address_mode::ZPAG, 3};
+  table[0x95] = {mnemonic::STA, address_mode::ZPAX, 4};
+  table[0x8D] = {mnemonic::STA, address_mode::ABSL, 4};
+  table[0x9D] = {mnemonic::STA, address_mode::ABSX, 5};
+  table[0x99] = {mnemonic::STA, address_mode::ABSY, 5};
+  table[0x81] = {mnemonic::STA, address_mode::INDX, 6};
+  table[0x91] = {mnemonic::STA, address_mode::INDY, 6};
+  table[0x86] = {mnemonic::STX, address_mode::ZPAG, 3};
+  table[0x96] = {mnemonic::STX, address_mode::ZPAY, 4};
+  table[0x8E] = {mnemonic::STX, address_mode::ABSL, 4};
+  table[0x84] = {mnemonic::STY, address_mode::ZPAG, 3};
+  table[0x94] = {mnemonic::STY, address_mode::ZPAX, 4};
+  table[0x8C] = {mnemonic::STY, address_mode::ABSL, 4};
+  table[0xAA] = {mnemonic::TAX, address_mode::IMPL, 2};
+  table[0xA8] = {mnemonic::TAY, address_mode::IMPL, 2};
+  table[0xBA] = {mnemonic::TSX, address_mode::IMPL, 2};
+  table[0x8A] = {mnemonic::TXA, address_mode::IMPL, 2};
+  table[0x9A] = {mnemonic::TXS, address_mode::IMPL, 2};
+  table[0x98] = {mnemonic::TYA, address_mode::IMPL, 2};
+  table[0x4B] = {mnemonic::ALR, address_mode::IMME, 2};
+  table[0x0B] = {mnemonic::ANC, address_mode::IMME, 2};
+  table[0x2B] = {mnemonic::ANC, address_mode::IMME, 2};
+  table[0x8B] = {mnemonic::ANE, address_mode::IMME, 2};
+  table[0x6B] = {mnemonic::ARR, address_mode::IMME, 2};
+  table[0xC7] = {mnemonic::DCP, address_mode::ZPAG, 5};
+  table[0xD7] = {mnemonic::DCP, address_mode::ZPAX, 6};
+  table[0xCF] = {mnemonic::DCP, address_mode::ABSL, 6};
+  table[0xDF] = {mnemonic::DCP, address_mode::ABSX, 7};
+  table[0xDB] = {mnemonic::DCP, address_mode::ABSY, 7};
+  table[0xC3] = {mnemonic::DCP, address_mode::INDX, 8};
+  table[0xD3] = {mnemonic::DCP, address_mode::INDY, 8};
+  table[0xE7] = {mnemonic::ISC, address_mode::ZPAG, 5};
+  table[0xF7] = {mnemonic::ISC, address_mode::ZPAX, 6};
+  table[0xEF] = {mnemonic::ISC, address_mode::ABSL, 6};
+  table[0xFF] = {mnemonic::ISC, address_mode::ABSX, 7};
+  table[0xFB] = {mnemonic::ISC, address_mode::ABSY, 7};
+  table[0xE3] = {mnemonic::ISC, address_mode::INDX, 8};
+  table[0xF3] = {mnemonic::ISC, address_mode::INDY, 8};
+  table[0xBB] = {mnemonic::LAS, address_mode::ABSY, 4};
+  table[0xA7] = {mnemonic::LAX, address_mode::ZPAG, 3};
+  table[0xB7] = {mnemonic::LAX, address_mode::ZPAY, 4};
+  table[0xAF] = {mnemonic::LAX, address_mode::ABSL, 4};
+  table[0xBF] = {mnemonic::LAX, address_mode::ABSY, 4};
+  table[0xA3] = {mnemonic::LAX, address_mode::INDX, 6};
+  table[0xB3] = {mnemonic::LAX, address_mode::INDY, 5};
+  table[0xAB] = {mnemonic::LXA, address_mode::IMME, 2};
+  table[0x27] = {mnemonic::RLA, address_mode::ZPAG, 5};
+  table[0x37] = {mnemonic::RLA, address_mode::ZPAX, 6};
+  table[0x2F] = {mnemonic::RLA, address_mode::ABSL, 6};
+  table[0x3F] = {mnemonic::RLA, address_mode::ABSX, 7};
+  table[0x3B] = {mnemonic::RLA, address_mode::ABSY, 7};
+  table[0x23] = {mnemonic::RLA, address_mode::INDX, 8};
+  table[0x33] = {mnemonic::RLA, address_mode::INDY, 8};
+  table[0x67] = {mnemonic::RRA, address_mode::ZPAG, 5};
+  table[0x77] = {mnemonic::RRA, address_mode::ZPAX, 6};
+  table[0x6F] = {mnemonic::RRA, address_mode::ABSL, 6};
+  table[0x7F] = {mnemonic::RRA, address_mode::ABSX, 7};
+  table[0x7B] = {mnemonic::RRA, address_mode::ABSY, 7};
+  table[0x63] = {mnemonic::RRA, address_mode::INDX, 8};
+  table[0x73] = {mnemonic::RRA, address_mode::INDY, 8};
+  table[0x87] = {mnemonic::SAX, address_mode::ZPAG, 3};
+  table[0x97] = {mnemonic::SAX, address_mode::ZPAY, 4};
+  table[0x8F] = {mnemonic::SAX, address_mode::ABSL, 4};
+  table[0x83] = {mnemonic::SAX, address_mode::INDX, 6};
+  table[0xCB] = {mnemonic::SBX, address_mode::IMME, 2};
+  table[0x9F] = {mnemonic::SHA, address_mode::ABSY, 5};
+  table[0x93] = {mnemonic::SHA, address_mode::INDY, 6};
+  table[0x9E] = {mnemonic::SHX, address_mode::ABSY, 5};
+  table[0x9C] = {mnemonic::SHY, address_mode::ABSX, 5};
+  table[0x07] = {mnemonic::SLO, address_mode::ZPAG, 5};
+  table[0x17] = {mnemonic::SLO, address_mode::ZPAX, 6};
+  table[0x0F] = {mnemonic::SLO, address_mode::ABSL, 6};
+  table[0x1F] = {mnemonic::SLO, address_mode::ABSX, 7};
+  table[0x1B] = {mnemonic::SLO, address_mode::ABSY, 7};
+  table[0x03] = {mnemonic::SLO, address_mode::INDX, 8};
+  table[0x13] = {mnemonic::SLO, address_mode::INDY, 8};
+  table[0x47] = {mnemonic::SRE, address_mode::ZPAG, 5};
+  table[0x57] = {mnemonic::SRE, address_mode::ZPAX, 6};
+  table[0x4F] = {mnemonic::SRE, address_mode::ABSL, 6};
+  table[0x5F] = {mnemonic::SRE, address_mode::ABSX, 7};
+  table[0x5B] = {mnemonic::SRE, address_mode::ABSY, 7};
+  table[0x43] = {mnemonic::SRE, address_mode::INDX, 8};
+  table[0x53] = {mnemonic::SRE, address_mode::INDY, 8};
+  table[0x9B] = {mnemonic::TAS, address_mode::ABSY, 5};
+  return table;
+}
+
+constexpr auto opcode_lookup_table = make_opcode_lookup_table();
 }; // namespace
 
 namespace erelic {
@@ -309,7 +444,7 @@ auto instruction::operator<<(std::ostream &os) const -> std::ostream & {
 }
 
 auto as_instruction(std::byte byte) -> instruction {
-  auto [op, cycles, mode] = instructions_info[byte];
+  auto [op, mode, cycles] = opcode_lookup_table[std::to_integer<size_t>(byte)];
   return {
     .opcode = byte,
     .op = op,
