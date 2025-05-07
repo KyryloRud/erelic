@@ -3,8 +3,9 @@ BasedOnStyle: LLVM
 IndentWidth: 2
 TabWidth: 2
 UseTab: Never
-ColumnLimit: 100
+ColumnLimit: 120
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortCaseLabelsOnASingleLine: true
+AlwaysBreakTemplateDeclarations: Yes
 ContinuationIndentWidth: 2
 DerivePointerAlignment: false

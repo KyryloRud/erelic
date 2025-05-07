@@ -326,8 +326,7 @@ auto as_instruction(std::byte byte) -> instruction {
 
 auto cycles_with_penalty(const instruction &info, address_boundary page_relation) -> size_t {
   auto is_page_crossed = page_relation == address_boundary::CROSSED;
-  auto is_mode_penalty = info.mode == address_mode::ABSOLUTEX ||
-                         info.mode == address_mode::ABSOLUTEY ||
+  auto is_mode_penalty = info.mode == address_mode::ABSOLUTEX || info.mode == address_mode::ABSOLUTEY ||
                          info.mode == address_mode::INDIRECTY;
 
   switch (info.op) {
