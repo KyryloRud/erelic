@@ -8,6 +8,6 @@ endif()
 
 set(TARGET core-tests)
 
-add_executable(${TARGET} dummy.cpp)
+add_executable(${TARGET} instruction.cpp)
 target_link_libraries(${TARGET} PUBLIC gtest gtest_main erelic-core)
 gtest_discover_tests(${TARGET})

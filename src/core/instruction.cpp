@@ -435,6 +435,10 @@ auto operator<<(std::ostream &os, const instruction_set &s) -> std::ostream & {
   return os;
 }
 
+auto instruction::operator==(const instruction &o) const noexcept -> bool {
+  return opcode == o.opcode && op == o.op && mode == o.mode && length == o.length && cycles == o.cycles && set == o.set;
+}
+
 auto operator<<(std::ostream &os, const instruction &instruction) -> std::ostream & {
   os << instruction.op << "(opc=";
   os << instruction.opcode << ", mem=";
