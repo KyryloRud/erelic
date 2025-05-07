@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstddef>
+#include <ostream>
 
 namespace erelic {
 enum class mnemonic {
@@ -84,32 +85,45 @@ enum class mnemonic {
   TXA,
   TXS,
   TYA,
-  USBC,
 };
+
+auto operator<<(std::ostream &os, const mnemonic &m) -> std::ostream &;
 
 enum class address_mode {
-  ABSOLUTE,
-  ABSOLUTEX,
-  ABSOLUTEY,
-  ACCUMULATOR,
-  IMMEDIATE,
-  IMPLIED,
-  INDIRECT,
-  INDIRECTX,
-  INDIRECTY,
-  RELATIVE,
-  ZEROPAGE,
-  ZEROPAGEX,
-  ZEROPAGEY,
+  ABSL,
+  ABSX,
+  ABSY,
+  ACCU,
+  IMME,
+  IMPL,
+  INDR,
+  INDX,
+  INDY,
+  RELA,
+  ZPAG,
+  ZPAX,
+  ZPAY,
 };
 
-struct instruction {
+auto operator<<(std::ostream &os, const address_mode &m) -> std::ostream &;
+
+enum class instruction_set {
+  STND,
+  NMOS,
+};
+
+auto operator<<(std::ostream &os, const instruction_set &s) -> std::ostream &;
+
+class instruction {
+public:
   const std::byte opcode = std::byte{0x80};
   const mnemonic op = mnemonic::NOP;
-  const address_mode mode = address_mode::IMMEDIATE;
+  const address_mode mode = address_mode::IMME;
   const size_t length = 2;
   const size_t cycles = 2;
-  const bool illegal = true;
+  const instruction_set set = instruction_set::STND;
+
+  auto operator<<(std::ostream &os) const -> std::ostream &;
 };
 
 enum class address_boundary {
