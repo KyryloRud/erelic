@@ -15,6 +15,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(ENABLE_TESTS "Build and run unit tests" ON)
 
+include(cmake/add_test_executable.cmake)
 if(ENABLE_TESTS)
    enable_testing()
 
