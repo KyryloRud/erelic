@@ -470,7 +470,7 @@ auto operator<<(std::ostream &os, const instruction &instruction) -> std::ostrea
   return os;
 }
 
-auto as_instruction(std::byte byte, instruction_set set) -> instruction {
+auto as_instruction(std::byte byte, instruction_set set) noexcept -> instruction {
   const auto instruction = opcode_lookup_table[std::to_integer<unsigned>(byte)];
 
   if (set == instruction_set::STND && set != instruction.set) {
@@ -481,7 +481,7 @@ auto as_instruction(std::byte byte, instruction_set set) -> instruction {
   return instruction;
 }
 
-auto cycles_with_penalty(const instruction &info, page_boundary page_relation) -> size_t {
+auto cycles_with_penalty(const instruction &info, page_boundary page_relation) noexcept -> size_t {
   if (info.mode != address_mode::ABSX && info.mode != address_mode::ABSY && info.mode != address_mode::INDY &&
       info.mode != address_mode::RELA) {
     return info.cycles;

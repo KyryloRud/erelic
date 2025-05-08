@@ -133,6 +133,6 @@ enum class page_boundary {
   NEXT,
 };
 
-[[nodiscard]] auto as_instruction(std::byte byte, instruction_set set) -> instruction;
-[[nodiscard]] auto cycles_with_penalty(const instruction &info, page_boundary page_relation) -> size_t;
+[[nodiscard]] auto as_instruction(std::byte byte, instruction_set set) noexcept -> instruction;
+[[nodiscard]] auto cycles_with_penalty(const instruction &info, page_boundary page_relation) noexcept -> size_t;
 }; // namespace erelic
