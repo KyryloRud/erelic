@@ -7,6 +7,6 @@
 #include <cstddef>
 #include <ostream>
 
-namespace erelic {
+namespace std {
 auto operator<<(std::ostream &os, std::byte byte) -> std::ostream &;
 };

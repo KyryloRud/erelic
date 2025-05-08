@@ -4,23 +4,11 @@
 
 #include "utility.hpp"
 
-#include <iomanip>
+#include <format>
 
-namespace erelic {
+namespace std {
 auto operator<<(std::ostream &os, std::byte byte) -> std::ostream & {
-  auto flags = os.flags();
-  auto fill = os.fill();
-
-  os << std::hex;
-  os << std::showbase;
-  os << std::internal;
-  os << std::setw(4);
-  os << std::setfill('0');
-  os << static_cast<int>(byte);
-
-  os.flags(flags);
-  os.fill(fill);
-
+  std::format_to(std::ostreambuf_iterator(os), "0x{:02X}", std::to_integer<unsigned>(byte));
   return os;
 }
-}; // namespace erelic
+}; // namespace std
