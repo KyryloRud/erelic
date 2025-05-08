@@ -4,8 +4,10 @@ IndentWidth: 2
 TabWidth: 2
 UseTab: Never
 ColumnLimit: 120
+AlignOperands: true
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortCaseLabelsOnASingleLine: true
 AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeTernaryOperators: false
 ContinuationIndentWidth: 2
 DerivePointerAlignment: false
