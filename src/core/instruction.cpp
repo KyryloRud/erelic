@@ -473,12 +473,22 @@ auto as_instruction(std::byte byte, instruction_set set) -> instruction {
   return instruction;
 }
 
-auto cycles_with_penalty(const instruction &info, address_boundary page_relation) -> size_t {
-  auto is_page_crossed = page_relation == address_boundary::CROSSED;
-  auto is_mode_penalty =
-    info.mode == address_mode::ABSX || info.mode == address_mode::ABSY || info.mode == address_mode::INDY;
+auto cycles_with_penalty(const instruction &info, page_boundary page_relation) -> size_t {
+  if (info.mode != address_mode::ABSX && info.mode != address_mode::ABSY && info.mode != address_mode::INDY &&
+      info.mode != address_mode::RELA) {
+    return info.cycles;
+  }
 
   switch (info.op) {
+  case mnemonic::ADC: [[fallthrough]];
+  case mnemonic::AND: [[fallthrough]];
+  case mnemonic::CMP: [[fallthrough]];
+  case mnemonic::EOR: [[fallthrough]];
+  case mnemonic::LDA: [[fallthrough]];
+  case mnemonic::LDX: [[fallthrough]];
+  case mnemonic::LDY: [[fallthrough]];
+  case mnemonic::ORA: [[fallthrough]];
+  case mnemonic::SBC: return page_boundary::NEXT == page_relation ? info.cycles + 1 : info.cycles;
   case mnemonic::BCC: [[fallthrough]];
   case mnemonic::BCS: [[fallthrough]];
   case mnemonic::BEQ: [[fallthrough]];
@@ -486,18 +496,7 @@ auto cycles_with_penalty(const instruction &info, address_boundary page_relation
   case mnemonic::BNE: [[fallthrough]];
   case mnemonic::BPL: [[fallthrough]];
   case mnemonic::BVC: [[fallthrough]];
-  case mnemonic::BVS: return info.cycles + (is_page_crossed ? 1 : 0);
-  case mnemonic::ADC: [[fallthrough]];
-  case mnemonic::AND: [[fallthrough]];
-  case mnemonic::CMP: [[fallthrough]];
-  case mnemonic::EOR: [[fallthrough]];
-  case mnemonic::LAS: [[fallthrough]];
-  case mnemonic::LAX: [[fallthrough]];
-  case mnemonic::LDA: [[fallthrough]];
-  case mnemonic::LDX: [[fallthrough]];
-  case mnemonic::LDY: [[fallthrough]];
-  case mnemonic::ORA: [[fallthrough]];
-  case mnemonic::SBC: return info.cycles + (is_page_crossed && is_mode_penalty ? 2 : 0);
+  case mnemonic::BVS: return page_boundary::NEXT == page_relation ? info.cycles + 2 : info.cycles + 1;
   default: return info.cycles;
   }
 }

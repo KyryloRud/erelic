@@ -1,17 +1,20 @@
-
 //
 // Created by Kyrylo Rud on 07.05.2025.
 //
 
-#include <array>
 #include <gtest/gtest.h>
+
+#include <algorithm>
+#include <array>
+#include <ranges>
+#include <tuple>
 
 #include "instruction.hpp"
 
 using namespace erelic;
 
-namespace instruction_set_bytes {
-constexpr auto stnd = std::array<instruction, 151>{
+namespace instruction_sets {
+constexpr auto stnd = std::array{
   // clang-format off
   instruction{ .opcode=std::byte{0x69}, .op=mnemonic::ADC, .mode=address_mode::IMME, .length=2, .cycles=2, .set=instruction_set::STND },
   instruction{ .opcode=std::byte{0x65}, .op=mnemonic::ADC, .mode=address_mode::ZPAG, .length=2, .cycles=3, .set=instruction_set::STND },
@@ -167,7 +170,7 @@ constexpr auto stnd = std::array<instruction, 151>{
   // clang-format on
 };
 
-constexpr auto nmos = std::array<instruction, 105>{
+constexpr auto nmos = std::array{
   // clang-format off
   instruction{ .opcode=std::byte{0xCF}, .op=mnemonic::DCP, .mode=address_mode::ABSL, .length=3, .cycles=6, .set=instruction_set::NMOS },
   instruction{ .opcode=std::byte{0xEF}, .op=mnemonic::ISC, .mode=address_mode::ABSL, .length=3, .cycles=6, .set=instruction_set::NMOS },
@@ -276,16 +279,92 @@ constexpr auto nmos = std::array<instruction, 105>{
   instruction{ .opcode=std::byte{0x97}, .op=mnemonic::SAX, .mode=address_mode::ZPAY, .length=2, .cycles=4, .set=instruction_set::NMOS },
   // clang-format on
 };
-}; // namespace instruction_set_bytes
+}; // namespace instruction_sets
+
+namespace penalty_opcodes {
+enum class type {
+  NEVER_CROSS,
+  SINGLE_PENALTY,
+  BRANCH_PENALTY,
+};
+
+constexpr auto single = std::array{
+  std::byte{0x7D}, std::byte{0x79}, std::byte{0x71}, std::byte{0x3D}, std::byte{0x39}, std::byte{0x31},
+  std::byte{0xDD}, std::byte{0xD9}, std::byte{0xD1}, std::byte{0x5D}, std::byte{0x59}, std::byte{0x51},
+  std::byte{0xBD}, std::byte{0xB9}, std::byte{0xB1}, std::byte{0xBE}, std::byte{0xBC}, std::byte{0x1D},
+  std::byte{0x19}, std::byte{0x11}, std::byte{0xFD}, std::byte{0xF9}, std::byte{0xF1},
+};
+
+constexpr auto branch = std::array{
+  std::byte{0x90}, std::byte{0xB0}, std::byte{0xF0}, std::byte{0x30},
+  std::byte{0xD0}, std::byte{0x10}, std::byte{0x50}, std::byte{0x70},
+};
+
+template <std::size_t N1, std::size_t N2>
+constexpr auto opcodes_excluding(const std::array<std::byte, N1> &a, const std::array<std::byte, N2> &b) {
+  constexpr auto opcode_count = 0xFF + 1;
+  constexpr auto outSize = opcode_count - (N1 + N2);
+
+  auto result = std::array<std::byte, outSize>{};
+  auto view = std::views::iota(0, int(opcode_count)) |
+              std::views::transform([](int x) { return static_cast<std::byte>(x); }) |
+              std::views::filter([&](std::byte v) {
+                return std::ranges::none_of(a, [&](auto x) { return x == v; }) &&
+                       std::ranges::none_of(b, [&](auto x) { return x == v; });
+              });
+
+  std::ranges::copy_n(std::ranges::begin(view), outSize, result.begin());
+  return result;
+}
+
+constexpr auto never_cross = opcodes_excluding(branch, single);
+}; // namespace penalty_opcodes
 
 class decode_instruction : public testing::TestWithParam<instruction> {};
 
-INSTANTIATE_TEST_SUITE_P(stdn, decode_instruction, testing::ValuesIn(instruction_set_bytes::stnd));
+INSTANTIATE_TEST_SUITE_P(stdn, decode_instruction, testing::ValuesIn(instruction_sets::stnd));
 
-INSTANTIATE_TEST_SUITE_P(nmos, decode_instruction, testing::ValuesIn(instruction_set_bytes::nmos));
+INSTANTIATE_TEST_SUITE_P(nmos, decode_instruction, testing::ValuesIn(instruction_sets::nmos));
 
 TEST_P(decode_instruction, as_instruction) {
   auto expected = GetParam();
   auto actual = erelic::as_instruction(expected.opcode, expected.set);
   EXPECT_EQ(expected, actual);
+}
+
+class decode_illegal_instruction : public testing::TestWithParam<instruction> {};
+
+INSTANTIATE_TEST_SUITE_P(illegal, decode_illegal_instruction, testing::ValuesIn(instruction_sets::nmos));
+
+TEST_P(decode_illegal_instruction, as_instruction) {
+  auto expected = erelic::instruction{};
+  auto actual = erelic::as_instruction(GetParam().opcode, instruction_set::STND);
+  EXPECT_EQ(expected, actual);
+}
+
+class calculate_cycle_penalty : public testing::TestWithParam<std::tuple<penalty_opcodes::type, std::byte>> {};
+
+INSTANTIATE_TEST_SUITE_P(NEVER_CROSS, calculate_cycle_penalty,
+                         testing::Combine(testing::Values(penalty_opcodes::type::NEVER_CROSS),
+                                          testing::ValuesIn(penalty_opcodes::never_cross)));
+
+INSTANTIATE_TEST_SUITE_P(SINGLE_PENALTY, calculate_cycle_penalty,
+                         testing::Combine(testing::Values(penalty_opcodes::type::SINGLE_PENALTY),
+                                          testing::ValuesIn(penalty_opcodes::single)));
+
+INSTANTIATE_TEST_SUITE_P(BRANCH_PENALTY, calculate_cycle_penalty,
+                         testing::Combine(testing::Values(penalty_opcodes::type::BRANCH_PENALTY),
+                                          testing::ValuesIn(penalty_opcodes::branch)));
+
+TEST_P(calculate_cycle_penalty, cycles_with_penalty) {
+  auto [penalty_type, byte] = GetParam();
+  auto instruction = erelic::as_instruction(byte, instruction_set::STND);
+
+  const auto same_page_penalty = penalty_opcodes::type::BRANCH_PENALTY == penalty_type ? 1 : 0;
+  const auto next_page_penalty = penalty_opcodes::type::BRANCH_PENALTY == penalty_type ? 2 :
+                                 penalty_opcodes::type::SINGLE_PENALTY == penalty_type ? 1 :
+                                                                                         0;
+
+  EXPECT_EQ(instruction.cycles + same_page_penalty, erelic::cycles_with_penalty(instruction, page_boundary::SAME));
+  EXPECT_EQ(instruction.cycles + next_page_penalty, erelic::cycles_with_penalty(instruction, page_boundary::NEXT));
 }
