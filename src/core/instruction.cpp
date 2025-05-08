@@ -6,6 +6,7 @@
 
 #include <array>
 #include <iomanip>
+#include <ranges>
 #include <tuple>
 
 #include "utility.hpp"
@@ -13,7 +14,7 @@
 namespace {
 using namespace erelic;
 
-constexpr auto which_instruction_set(mnemonic op, std::byte byte) -> instruction_set {
+consteval auto which_instruction_set(mnemonic op, std::byte byte) -> instruction_set {
   switch (op) {
   case mnemonic::ALR: [[fallthrough]];
   case mnemonic::ANC: [[fallthrough]];
@@ -41,7 +42,7 @@ constexpr auto which_instruction_set(mnemonic op, std::byte byte) -> instruction
   }
 }
 
-constexpr auto instruction_length(address_mode mode) -> size_t {
+consteval auto instruction_length(address_mode mode) -> size_t {
   switch (mode) {
   case address_mode::ACCU: return 1;
   case address_mode::ABSL: return 3;
@@ -60,10 +61,8 @@ constexpr auto instruction_length(address_mode mode) -> size_t {
 }
 
 using instr_info = std::tuple<mnemonic, address_mode, size_t /* cycles */>;
-using lookup_table = std::array<instr_info, 256>;
-
-constexpr auto make_opcode_lookup_table() -> lookup_table {
-  auto table = lookup_table{};
+consteval auto make_opcode_lookup_table_data() {
+  auto table = std::array<instr_info, 256>{};
   table[0x69] = {mnemonic::ADC, address_mode::IMME, 2};
   table[0x65] = {mnemonic::ADC, address_mode::ZPAG, 3};
   table[0x75] = {mnemonic::ADC, address_mode::ZPAX, 4};
@@ -323,19 +322,28 @@ constexpr auto make_opcode_lookup_table() -> lookup_table {
   return table;
 }
 
-constexpr auto opcode_lookup_table = make_opcode_lookup_table();
+consteval auto make_lookup_table() {
+  constexpr auto lookup_table_data = make_opcode_lookup_table_data();
 
-constexpr auto fetch_instruction(std::byte byte) -> instruction {
-  auto [op, mode, cycles] = opcode_lookup_table[std::to_integer<size_t>(byte)];
-  return {
-    .opcode = byte,
-    .op = op,
-    .mode = mode,
-    .length = instruction_length(mode),
-    .cycles = cycles,
-    .set = which_instruction_set(op, byte),
-  };
+  auto table = std::array<instruction, std::size(lookup_table_data)>{};
+  for (auto [index, data] : std::views::enumerate(lookup_table_data)) {
+    const auto byte = std::byte{static_cast<std::uint8_t>(index)};
+    const auto [op, mode, cycles] = data;
+
+    table[index] = {
+      .opcode = byte,
+      .op = op,
+      .mode = mode,
+      .length = instruction_length(mode),
+      .cycles = cycles,
+      .set = which_instruction_set(op, byte),
+    };
+  }
+
+  return table;
 }
+
+constexpr auto opcode_lookup_table = make_lookup_table();
 }; // namespace
 
 namespace erelic {
@@ -463,10 +471,10 @@ auto operator<<(std::ostream &os, const instruction &instruction) -> std::ostrea
 }
 
 auto as_instruction(std::byte byte, instruction_set set) -> instruction {
-  auto instruction = fetch_instruction(byte);
+  const auto instruction = opcode_lookup_table[std::to_integer<unsigned>(byte)];
 
   if (set == instruction_set::STND && set != instruction.set) {
-    constexpr auto nop_instruction = fetch_instruction(std::byte{0xEA});
+    constexpr auto nop_instruction = opcode_lookup_table[0xEA];
     return nop_instruction;
   }
 

@@ -116,12 +116,12 @@ auto operator<<(std::ostream &os, const instruction_set &s) -> std::ostream &;
 
 class instruction {
 public:
-  const std::byte opcode = std::byte{0xEA};
-  const mnemonic op = mnemonic::NOP;
-  const address_mode mode = address_mode::IMPL;
-  const size_t length = 1;
-  const size_t cycles = 2;
-  const instruction_set set = instruction_set::STND;
+  std::byte opcode = std::byte{0xEA};
+  mnemonic op = mnemonic::NOP;
+  address_mode mode = address_mode::IMPL;
+  size_t length = 1;
+  size_t cycles = 2;
+  instruction_set set = instruction_set::STND;
 
   auto operator==(const instruction &o) const noexcept -> bool;
 };
@@ -133,6 +133,6 @@ enum class page_boundary {
   NEXT,
 };
 
-auto as_instruction(std::byte byte, instruction_set set) -> instruction;
-auto cycles_with_penalty(const instruction &info, page_boundary page_relation) -> size_t;
+[[nodiscard]] auto as_instruction(std::byte byte, instruction_set set) -> instruction;
+[[nodiscard]] auto cycles_with_penalty(const instruction &info, page_boundary page_relation) -> size_t;
 }; // namespace erelic
