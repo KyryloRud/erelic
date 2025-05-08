@@ -9,6 +9,8 @@ add_library(${TARGET} STATIC
    instruction.cpp
    utility.hpp
    utility.cpp
+   address.hpp
+   address.cpp
 )
 target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
