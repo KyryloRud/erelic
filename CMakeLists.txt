@@ -12,10 +12,12 @@ project(erelic VERSION 0.0.1
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(ENABLE_TESTS "Build and run unit tests" ON)
 
 include(cmake/add_test_executable.cmake)
+include(cmake/clang_tools.cmake)
 if(ENABLE_TESTS)
    enable_testing()
 
@@ -30,8 +32,7 @@ add_compile_options(
    -Werror
 )
 
-file(GLOB_RECURSE ALL_SOURCE_FILES CONFIGURE_DEPENDS "src/*.cpp" "src/*.hpp")
-add_custom_target(format COMMAND clang-format -i ${ALL_SOURCE_FILES} COMMENT "Reformat all source files")
-add_custom_target(format-check COMMAND clang-format --dry-run --Werror ${ALL_SOURCE_FILES} COMMENT "Verify source files are clang‑format compliant")
+clang_format(DIRECTORY src/ FILES_REGEX "*.cpp" "*.hpp")
+clang_tidy(DIRECTORY src/)
 
 add_subdirectory(src)

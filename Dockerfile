@@ -5,4 +5,5 @@ RUN apk add \
    clang19-extra-tools \
    cmake \
    gtest-dev \
-   make
+   make \
+   python3
