@@ -11,6 +11,8 @@ add_library(${TARGET} STATIC
    utility.cpp
    address.hpp
    address.cpp
+   device.hpp
+   device.cpp
 )
 target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
