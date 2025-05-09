@@ -2,9 +2,10 @@
 // Created by Kyrylo Rud on 07.05.2025.
 //
 
+#include <gtest/gtest.h>
+
 #include <compare>
 #include <cstddef>
-#include <gtest/gtest.h>
 
 #include "address.hpp"
 
