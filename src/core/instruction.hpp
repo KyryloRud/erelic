@@ -114,8 +114,7 @@ enum class instruction_set {
 
 auto operator<<(std::ostream &os, const instruction_set &s) -> std::ostream &;
 
-class instruction {
-public:
+struct instruction {
   std::byte opcode = std::byte{0xEA};
   mnemonic op = mnemonic::NOP;
   address_mode mode = address_mode::IMPL;
