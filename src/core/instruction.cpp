@@ -18,47 +18,47 @@ using namespace erelic;
 
 consteval auto which_instruction_set(mnemonic op, std::byte byte) -> instruction_set {
   switch (op) {
-  case mnemonic::ALR: [[fallthrough]];
-  case mnemonic::ANC: [[fallthrough]];
-  case mnemonic::ANE: [[fallthrough]];
-  case mnemonic::ARR: [[fallthrough]];
-  case mnemonic::DCP: [[fallthrough]];
-  case mnemonic::ISC: [[fallthrough]];
-  case mnemonic::JAM: [[fallthrough]];
-  case mnemonic::LAS: [[fallthrough]];
-  case mnemonic::LAX: [[fallthrough]];
-  case mnemonic::LXA: [[fallthrough]];
-  case mnemonic::RLA: [[fallthrough]];
-  case mnemonic::RRA: [[fallthrough]];
-  case mnemonic::SAX: [[fallthrough]];
-  case mnemonic::SBX: [[fallthrough]];
-  case mnemonic::SHA: [[fallthrough]];
-  case mnemonic::SHX: [[fallthrough]];
-  case mnemonic::SHY: [[fallthrough]];
-  case mnemonic::SLO: [[fallthrough]];
-  case mnemonic::SRE: [[fallthrough]];
-  case mnemonic::TAS: return instruction_set::NMOS;
-  case mnemonic::NOP: return std::byte{0xEA} == byte ? instruction_set::STND : instruction_set::NMOS;
-  case mnemonic::SBC: return std::byte{0xEB} == byte ? instruction_set::NMOS : instruction_set::STND;
-  default: return instruction_set::STND;
+    case mnemonic::ALR: [[fallthrough]];
+    case mnemonic::ANC: [[fallthrough]];
+    case mnemonic::ANE: [[fallthrough]];
+    case mnemonic::ARR: [[fallthrough]];
+    case mnemonic::DCP: [[fallthrough]];
+    case mnemonic::ISC: [[fallthrough]];
+    case mnemonic::JAM: [[fallthrough]];
+    case mnemonic::LAS: [[fallthrough]];
+    case mnemonic::LAX: [[fallthrough]];
+    case mnemonic::LXA: [[fallthrough]];
+    case mnemonic::RLA: [[fallthrough]];
+    case mnemonic::RRA: [[fallthrough]];
+    case mnemonic::SAX: [[fallthrough]];
+    case mnemonic::SBX: [[fallthrough]];
+    case mnemonic::SHA: [[fallthrough]];
+    case mnemonic::SHX: [[fallthrough]];
+    case mnemonic::SHY: [[fallthrough]];
+    case mnemonic::SLO: [[fallthrough]];
+    case mnemonic::SRE: [[fallthrough]];
+    case mnemonic::TAS: return instruction_set::NMOS;
+    case mnemonic::NOP: return std::byte{0xEA} == byte ? instruction_set::STND : instruction_set::NMOS;
+    case mnemonic::SBC: return std::byte{0xEB} == byte ? instruction_set::NMOS : instruction_set::STND;
+    default: return instruction_set::STND;
   }
 }
 
 consteval auto instruction_length(address_mode mode) -> size_t {
   switch (mode) {
-  case address_mode::ACCU: [[fallthrough]];
-  case address_mode::IMPL: return 1;
-  case address_mode::IMME: [[fallthrough]];
-  case address_mode::INDX: [[fallthrough]];
-  case address_mode::INDY: [[fallthrough]];
-  case address_mode::RELA: [[fallthrough]];
-  case address_mode::ZPAG: [[fallthrough]];
-  case address_mode::ZPAX: [[fallthrough]];
-  case address_mode::ZPAY: return 2;
-  case address_mode::ABSL: [[fallthrough]];
-  case address_mode::ABSX: [[fallthrough]];
-  case address_mode::ABSY: [[fallthrough]];
-  case address_mode::INDR: return 3;
+    case address_mode::ACCU: [[fallthrough]];
+    case address_mode::IMPL: return 1;
+    case address_mode::IMME: [[fallthrough]];
+    case address_mode::INDX: [[fallthrough]];
+    case address_mode::INDY: [[fallthrough]];
+    case address_mode::RELA: [[fallthrough]];
+    case address_mode::ZPAG: [[fallthrough]];
+    case address_mode::ZPAX: [[fallthrough]];
+    case address_mode::ZPAY: return 2;
+    case address_mode::ABSL: [[fallthrough]];
+    case address_mode::ABSX: [[fallthrough]];
+    case address_mode::ABSY: [[fallthrough]];
+    case address_mode::INDR: return 3;
   }
 }
 
@@ -352,109 +352,109 @@ constexpr auto opcode_lookup_table = make_lookup_table();
 namespace erelic {
 auto operator<<(std::ostream &os, const mnemonic &m) -> std::ostream & {
   switch (m) {
-  case mnemonic::ADC: os << "ADC"; break;
-  case mnemonic::ALR: os << "ALR"; break;
-  case mnemonic::ANC: os << "ANC"; break;
-  case mnemonic::AND: os << "AND"; break;
-  case mnemonic::ANE: os << "ANE"; break;
-  case mnemonic::ARR: os << "ARR"; break;
-  case mnemonic::ASL: os << "ASL"; break;
-  case mnemonic::BCC: os << "BCC"; break;
-  case mnemonic::BCS: os << "BCS"; break;
-  case mnemonic::BEQ: os << "BEQ"; break;
-  case mnemonic::BIT: os << "BIT"; break;
-  case mnemonic::BMI: os << "BMI"; break;
-  case mnemonic::BNE: os << "BNE"; break;
-  case mnemonic::BPL: os << "BPL"; break;
-  case mnemonic::BRK: os << "BRK"; break;
-  case mnemonic::BVC: os << "BVC"; break;
-  case mnemonic::BVS: os << "BVS"; break;
-  case mnemonic::CLC: os << "CLC"; break;
-  case mnemonic::CLD: os << "CLD"; break;
-  case mnemonic::CLI: os << "CLI"; break;
-  case mnemonic::CLV: os << "CLV"; break;
-  case mnemonic::CMP: os << "CMP"; break;
-  case mnemonic::CPX: os << "CPX"; break;
-  case mnemonic::CPY: os << "CPY"; break;
-  case mnemonic::DCP: os << "DCP"; break;
-  case mnemonic::DEC: os << "DEC"; break;
-  case mnemonic::DEX: os << "DEX"; break;
-  case mnemonic::DEY: os << "DEY"; break;
-  case mnemonic::EOR: os << "EOR"; break;
-  case mnemonic::INC: os << "INC"; break;
-  case mnemonic::INX: os << "INX"; break;
-  case mnemonic::INY: os << "INY"; break;
-  case mnemonic::ISC: os << "ISC"; break;
-  case mnemonic::JAM: os << "JAM"; break;
-  case mnemonic::JMP: os << "JMP"; break;
-  case mnemonic::JSR: os << "JSR"; break;
-  case mnemonic::LAS: os << "LAS"; break;
-  case mnemonic::LAX: os << "LAX"; break;
-  case mnemonic::LDA: os << "LDA"; break;
-  case mnemonic::LDX: os << "LDX"; break;
-  case mnemonic::LDY: os << "LDY"; break;
-  case mnemonic::LSR: os << "LSR"; break;
-  case mnemonic::LXA: os << "LXA"; break;
-  case mnemonic::NOP: os << "NOP"; break;
-  case mnemonic::ORA: os << "ORA"; break;
-  case mnemonic::PHA: os << "PHA"; break;
-  case mnemonic::PHP: os << "PHP"; break;
-  case mnemonic::PLA: os << "PLA"; break;
-  case mnemonic::PLP: os << "PLP"; break;
-  case mnemonic::RLA: os << "RLA"; break;
-  case mnemonic::ROL: os << "ROL"; break;
-  case mnemonic::ROR: os << "ROR"; break;
-  case mnemonic::RRA: os << "RRA"; break;
-  case mnemonic::RTI: os << "RTI"; break;
-  case mnemonic::RTS: os << "RTS"; break;
-  case mnemonic::SAX: os << "SAX"; break;
-  case mnemonic::SBC: os << "SBC"; break;
-  case mnemonic::SBX: os << "SBX"; break;
-  case mnemonic::SEC: os << "SEC"; break;
-  case mnemonic::SED: os << "SED"; break;
-  case mnemonic::SEI: os << "SEI"; break;
-  case mnemonic::SHA: os << "SHA"; break;
-  case mnemonic::SHX: os << "SHX"; break;
-  case mnemonic::SHY: os << "SHY"; break;
-  case mnemonic::SLO: os << "SLO"; break;
-  case mnemonic::SRE: os << "SRE"; break;
-  case mnemonic::STA: os << "STA"; break;
-  case mnemonic::STX: os << "STX"; break;
-  case mnemonic::STY: os << "STY"; break;
-  case mnemonic::TAS: os << "TAS"; break;
-  case mnemonic::TAX: os << "TAX"; break;
-  case mnemonic::TAY: os << "TAY"; break;
-  case mnemonic::TSX: os << "TSX"; break;
-  case mnemonic::TXA: os << "TXA"; break;
-  case mnemonic::TXS: os << "TXS"; break;
-  case mnemonic::TYA: os << "TYA"; break;
+    case mnemonic::ADC: os << "ADC"; break;
+    case mnemonic::ALR: os << "ALR"; break;
+    case mnemonic::ANC: os << "ANC"; break;
+    case mnemonic::AND: os << "AND"; break;
+    case mnemonic::ANE: os << "ANE"; break;
+    case mnemonic::ARR: os << "ARR"; break;
+    case mnemonic::ASL: os << "ASL"; break;
+    case mnemonic::BCC: os << "BCC"; break;
+    case mnemonic::BCS: os << "BCS"; break;
+    case mnemonic::BEQ: os << "BEQ"; break;
+    case mnemonic::BIT: os << "BIT"; break;
+    case mnemonic::BMI: os << "BMI"; break;
+    case mnemonic::BNE: os << "BNE"; break;
+    case mnemonic::BPL: os << "BPL"; break;
+    case mnemonic::BRK: os << "BRK"; break;
+    case mnemonic::BVC: os << "BVC"; break;
+    case mnemonic::BVS: os << "BVS"; break;
+    case mnemonic::CLC: os << "CLC"; break;
+    case mnemonic::CLD: os << "CLD"; break;
+    case mnemonic::CLI: os << "CLI"; break;
+    case mnemonic::CLV: os << "CLV"; break;
+    case mnemonic::CMP: os << "CMP"; break;
+    case mnemonic::CPX: os << "CPX"; break;
+    case mnemonic::CPY: os << "CPY"; break;
+    case mnemonic::DCP: os << "DCP"; break;
+    case mnemonic::DEC: os << "DEC"; break;
+    case mnemonic::DEX: os << "DEX"; break;
+    case mnemonic::DEY: os << "DEY"; break;
+    case mnemonic::EOR: os << "EOR"; break;
+    case mnemonic::INC: os << "INC"; break;
+    case mnemonic::INX: os << "INX"; break;
+    case mnemonic::INY: os << "INY"; break;
+    case mnemonic::ISC: os << "ISC"; break;
+    case mnemonic::JAM: os << "JAM"; break;
+    case mnemonic::JMP: os << "JMP"; break;
+    case mnemonic::JSR: os << "JSR"; break;
+    case mnemonic::LAS: os << "LAS"; break;
+    case mnemonic::LAX: os << "LAX"; break;
+    case mnemonic::LDA: os << "LDA"; break;
+    case mnemonic::LDX: os << "LDX"; break;
+    case mnemonic::LDY: os << "LDY"; break;
+    case mnemonic::LSR: os << "LSR"; break;
+    case mnemonic::LXA: os << "LXA"; break;
+    case mnemonic::NOP: os << "NOP"; break;
+    case mnemonic::ORA: os << "ORA"; break;
+    case mnemonic::PHA: os << "PHA"; break;
+    case mnemonic::PHP: os << "PHP"; break;
+    case mnemonic::PLA: os << "PLA"; break;
+    case mnemonic::PLP: os << "PLP"; break;
+    case mnemonic::RLA: os << "RLA"; break;
+    case mnemonic::ROL: os << "ROL"; break;
+    case mnemonic::ROR: os << "ROR"; break;
+    case mnemonic::RRA: os << "RRA"; break;
+    case mnemonic::RTI: os << "RTI"; break;
+    case mnemonic::RTS: os << "RTS"; break;
+    case mnemonic::SAX: os << "SAX"; break;
+    case mnemonic::SBC: os << "SBC"; break;
+    case mnemonic::SBX: os << "SBX"; break;
+    case mnemonic::SEC: os << "SEC"; break;
+    case mnemonic::SED: os << "SED"; break;
+    case mnemonic::SEI: os << "SEI"; break;
+    case mnemonic::SHA: os << "SHA"; break;
+    case mnemonic::SHX: os << "SHX"; break;
+    case mnemonic::SHY: os << "SHY"; break;
+    case mnemonic::SLO: os << "SLO"; break;
+    case mnemonic::SRE: os << "SRE"; break;
+    case mnemonic::STA: os << "STA"; break;
+    case mnemonic::STX: os << "STX"; break;
+    case mnemonic::STY: os << "STY"; break;
+    case mnemonic::TAS: os << "TAS"; break;
+    case mnemonic::TAX: os << "TAX"; break;
+    case mnemonic::TAY: os << "TAY"; break;
+    case mnemonic::TSX: os << "TSX"; break;
+    case mnemonic::TXA: os << "TXA"; break;
+    case mnemonic::TXS: os << "TXS"; break;
+    case mnemonic::TYA: os << "TYA"; break;
   }
   return os;
 }
 
 auto operator<<(std::ostream &os, const address_mode &m) -> std::ostream & {
   switch (m) {
-  case address_mode::ABSL: os << "ABSL"; break;
-  case address_mode::ABSX: os << "ABSX"; break;
-  case address_mode::ABSY: os << "ABSY"; break;
-  case address_mode::ACCU: os << "ACCU"; break;
-  case address_mode::IMME: os << "IMME"; break;
-  case address_mode::IMPL: os << "IMPL"; break;
-  case address_mode::INDR: os << "INDR"; break;
-  case address_mode::INDX: os << "INDX"; break;
-  case address_mode::INDY: os << "INDY"; break;
-  case address_mode::RELA: os << "RELA"; break;
-  case address_mode::ZPAG: os << "ZPAG"; break;
-  case address_mode::ZPAX: os << "ZPAX"; break;
-  case address_mode::ZPAY: os << "ZPAY"; break;
+    case address_mode::ABSL: os << "ABSL"; break;
+    case address_mode::ABSX: os << "ABSX"; break;
+    case address_mode::ABSY: os << "ABSY"; break;
+    case address_mode::ACCU: os << "ACCU"; break;
+    case address_mode::IMME: os << "IMME"; break;
+    case address_mode::IMPL: os << "IMPL"; break;
+    case address_mode::INDR: os << "INDR"; break;
+    case address_mode::INDX: os << "INDX"; break;
+    case address_mode::INDY: os << "INDY"; break;
+    case address_mode::RELA: os << "RELA"; break;
+    case address_mode::ZPAG: os << "ZPAG"; break;
+    case address_mode::ZPAX: os << "ZPAX"; break;
+    case address_mode::ZPAY: os << "ZPAY"; break;
   }
   return os;
 }
 
 auto operator<<(std::ostream &os, const instruction_set &s) -> std::ostream & {
   switch (s) {
-  case instruction_set::STND: os << "STND"; break;
-  case instruction_set::NMOS: os << "NMOS"; break;
+    case instruction_set::STND: os << "STND"; break;
+    case instruction_set::NMOS: os << "NMOS"; break;
   }
   return os;
 }
@@ -488,24 +488,24 @@ auto cycles_with_penalty(const instruction &info, page_boundary page_relation) n
   }
 
   switch (info.op) {
-  case mnemonic::ADC: [[fallthrough]];
-  case mnemonic::AND: [[fallthrough]];
-  case mnemonic::CMP: [[fallthrough]];
-  case mnemonic::EOR: [[fallthrough]];
-  case mnemonic::LDA: [[fallthrough]];
-  case mnemonic::LDX: [[fallthrough]];
-  case mnemonic::LDY: [[fallthrough]];
-  case mnemonic::ORA: [[fallthrough]];
-  case mnemonic::SBC: return page_boundary::NEXT == page_relation ? info.cycles + 1 : info.cycles;
-  case mnemonic::BCC: [[fallthrough]];
-  case mnemonic::BCS: [[fallthrough]];
-  case mnemonic::BEQ: [[fallthrough]];
-  case mnemonic::BMI: [[fallthrough]];
-  case mnemonic::BNE: [[fallthrough]];
-  case mnemonic::BPL: [[fallthrough]];
-  case mnemonic::BVC: [[fallthrough]];
-  case mnemonic::BVS: return page_boundary::NEXT == page_relation ? info.cycles + 2 : info.cycles + 1;
-  default: return info.cycles;
+    case mnemonic::ADC: [[fallthrough]];
+    case mnemonic::AND: [[fallthrough]];
+    case mnemonic::CMP: [[fallthrough]];
+    case mnemonic::EOR: [[fallthrough]];
+    case mnemonic::LDA: [[fallthrough]];
+    case mnemonic::LDX: [[fallthrough]];
+    case mnemonic::LDY: [[fallthrough]];
+    case mnemonic::ORA: [[fallthrough]];
+    case mnemonic::SBC: return page_boundary::NEXT == page_relation ? info.cycles + 1 : info.cycles;
+    case mnemonic::BCC: [[fallthrough]];
+    case mnemonic::BCS: [[fallthrough]];
+    case mnemonic::BEQ: [[fallthrough]];
+    case mnemonic::BMI: [[fallthrough]];
+    case mnemonic::BNE: [[fallthrough]];
+    case mnemonic::BPL: [[fallthrough]];
+    case mnemonic::BVC: [[fallthrough]];
+    case mnemonic::BVS: return page_boundary::NEXT == page_relation ? info.cycles + 2 : info.cycles + 1;
+    default: return info.cycles;
   }
 }
 }; // namespace erelic

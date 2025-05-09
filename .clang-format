@@ -11,3 +11,4 @@ AlwaysBreakTemplateDeclarations: Yes
 BreakBeforeTernaryOperators: false
 ContinuationIndentWidth: 2
 DerivePointerAlignment: false
+IndentCaseLabels: true

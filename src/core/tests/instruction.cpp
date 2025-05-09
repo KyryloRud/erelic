@@ -366,9 +366,9 @@ TEST_P(calculate_cycle_penalty, cycles_with_penalty) {
   constexpr auto get_penalty = [](const auto type, const auto boundary) {
     switch (type) {
       using enum penalty_opcodes::type;
-    case SINGLE_PENALTY: return page_boundary::SAME == boundary ? 0 : 1;
-    case BRANCH_PENALTY: return page_boundary::SAME == boundary ? 1 : 2;
-    case NEVER_CROSS: return 0;
+      case SINGLE_PENALTY: return page_boundary::SAME == boundary ? 0 : 1;
+      case BRANCH_PENALTY: return page_boundary::SAME == boundary ? 1 : 2;
+      case NEVER_CROSS: return 0;
     }
   };
 

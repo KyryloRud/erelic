@@ -5,5 +5,10 @@ RUN apk add \
    clang19-extra-tools \
    cmake \
    gtest-dev \
+   lldb \
    make \
-   python3
+   python3 \
+   zsh
+
+ENTRYPOINT [ "/bin/zsh" ]
+SHELL [ "/bin/zsh" ]
