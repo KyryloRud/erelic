@@ -123,7 +123,7 @@ public:
   size_t cycles = 2;
   instruction_set set = instruction_set::STND;
 
-  auto operator==(const instruction &o) const noexcept -> bool;
+  auto operator==(const instruction &o) const noexcept -> bool = default;
 };
 
 auto operator<<(std::ostream &os, const instruction &instruction) -> std::ostream &;

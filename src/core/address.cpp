@@ -4,10 +4,11 @@
 
 #include "address.hpp"
 
+#include <compare>
+#include <cstddef>
 #include <format>
 #include <iterator>
-
-#include "utility.hpp"
+#include <ostream>
 
 namespace erelic {
 auto address::operator<=>(const address &addr) const noexcept -> std::strong_ordering { return raw <=> addr.raw; }

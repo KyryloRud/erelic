@@ -4,7 +4,10 @@
 
 #include "utility.hpp"
 
+#include <cstddef>
 #include <format>
+#include <iterator>
+#include <ostream>
 
 namespace std {
 auto operator<<(std::ostream &os, std::byte byte) -> std::ostream & {

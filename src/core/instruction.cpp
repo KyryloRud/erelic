@@ -5,7 +5,9 @@
 #include "instruction.hpp"
 
 #include <array>
-#include <iomanip>
+#include <cstddef>
+#include <cstdint>
+#include <ostream>
 #include <ranges>
 #include <tuple>
 
@@ -44,19 +46,19 @@ consteval auto which_instruction_set(mnemonic op, std::byte byte) -> instruction
 
 consteval auto instruction_length(address_mode mode) -> size_t {
   switch (mode) {
-  case address_mode::ACCU: return 1;
-  case address_mode::ABSL: return 3;
-  case address_mode::ABSX: return 3;
-  case address_mode::ABSY: return 3;
-  case address_mode::IMME: return 2;
+  case address_mode::ACCU: [[fallthrough]];
   case address_mode::IMPL: return 1;
-  case address_mode::INDR: return 3;
-  case address_mode::INDX: return 2;
-  case address_mode::INDY: return 2;
-  case address_mode::RELA: return 2;
-  case address_mode::ZPAG: return 2;
-  case address_mode::ZPAX: return 2;
+  case address_mode::IMME: [[fallthrough]];
+  case address_mode::INDX: [[fallthrough]];
+  case address_mode::INDY: [[fallthrough]];
+  case address_mode::RELA: [[fallthrough]];
+  case address_mode::ZPAG: [[fallthrough]];
+  case address_mode::ZPAX: [[fallthrough]];
   case address_mode::ZPAY: return 2;
+  case address_mode::ABSL: [[fallthrough]];
+  case address_mode::ABSX: [[fallthrough]];
+  case address_mode::ABSY: [[fallthrough]];
+  case address_mode::INDR: return 3;
   }
 }
 
@@ -330,6 +332,7 @@ consteval auto make_lookup_table() {
     const auto byte = std::byte{static_cast<std::uint8_t>(index)};
     const auto [op, mode, cycles] = data;
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
     table[index] = {
       .opcode = byte,
       .op = op,
@@ -456,10 +459,6 @@ auto operator<<(std::ostream &os, const instruction_set &s) -> std::ostream & {
   return os;
 }
 
-auto instruction::operator==(const instruction &o) const noexcept -> bool {
-  return opcode == o.opcode && op == o.op && mode == o.mode && length == o.length && cycles == o.cycles && set == o.set;
-}
-
 auto operator<<(std::ostream &os, const instruction &instruction) -> std::ostream & {
   os << instruction.op << "(opc=";
   os << instruction.opcode << ", mem=";
@@ -471,6 +470,7 @@ auto operator<<(std::ostream &os, const instruction &instruction) -> std::ostrea
 }
 
 auto as_instruction(std::byte byte, instruction_set set) noexcept -> instruction {
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
   const auto instruction = opcode_lookup_table[std::to_integer<unsigned>(byte)];
 
   if (set == instruction_set::STND && set != instruction.set) {

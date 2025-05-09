@@ -2,6 +2,7 @@
 // Created by Kyrylo Rud on 07.05.2025.
 //
 
+#include <cstddef>
 #include <gtest/gtest.h>
 
 #include <algorithm>
@@ -300,12 +301,13 @@ constexpr auto branch = std::array{
   std::byte{0xD0}, std::byte{0x10}, std::byte{0x50}, std::byte{0x70},
 };
 
+namespace {
 template <std::size_t N1, std::size_t N2>
-constexpr auto opcodes_excluding(const std::array<std::byte, N1> &a, const std::array<std::byte, N2> &b) {
+consteval auto opcodes_excluding(const std::array<std::byte, N1> &a, const std::array<std::byte, N2> &b) {
   constexpr auto opcode_count = 0xFF + 1;
-  constexpr auto outSize = opcode_count - (N1 + N2);
+  constexpr auto out_size = opcode_count - (N1 + N2);
 
-  auto result = std::array<std::byte, outSize>{};
+  auto result = std::array<std::byte, out_size>{};
   auto view = std::views::iota(0, int(opcode_count)) |
               std::views::transform([](int x) { return static_cast<std::byte>(x); }) |
               std::views::filter([&](std::byte v) {
@@ -313,9 +315,10 @@ constexpr auto opcodes_excluding(const std::array<std::byte, N1> &a, const std::
                        std::ranges::none_of(b, [&](auto x) { return x == v; });
               });
 
-  std::ranges::copy_n(std::ranges::begin(view), outSize, result.begin());
+  std::ranges::copy_n(std::ranges::begin(view), out_size, result.begin());
   return result;
 }
+}; // namespace
 
 constexpr auto never_cross = opcodes_excluding(branch, single);
 }; // namespace penalty_opcodes
@@ -360,10 +363,17 @@ TEST_P(calculate_cycle_penalty, cycles_with_penalty) {
   auto [penalty_type, byte] = GetParam();
   auto instruction = erelic::as_instruction(byte, instruction_set::STND);
 
-  const auto same_page_penalty = penalty_opcodes::type::BRANCH_PENALTY == penalty_type ? 1 : 0;
-  const auto next_page_penalty = penalty_opcodes::type::BRANCH_PENALTY == penalty_type ? 2 :
-                                 penalty_opcodes::type::SINGLE_PENALTY == penalty_type ? 1 :
-                                                                                         0;
+  constexpr auto get_penalty = [](const auto type, const auto boundary) {
+    switch (type) {
+      using enum penalty_opcodes::type;
+    case SINGLE_PENALTY: return page_boundary::SAME == boundary ? 0 : 1;
+    case BRANCH_PENALTY: return page_boundary::SAME == boundary ? 1 : 2;
+    case NEVER_CROSS: return 0;
+    }
+  };
+
+  const auto same_page_penalty = get_penalty(penalty_type, page_boundary::SAME);
+  const auto next_page_penalty = get_penalty(penalty_type, page_boundary::NEXT);
 
   EXPECT_EQ(instruction.cycles + same_page_penalty, erelic::cycles_with_penalty(instruction, page_boundary::SAME));
   EXPECT_EQ(instruction.cycles + next_page_penalty, erelic::cycles_with_penalty(instruction, page_boundary::NEXT));
