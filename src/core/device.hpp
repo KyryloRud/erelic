@@ -11,7 +11,7 @@
 #include "address.hpp"
 
 namespace erelic {
-enum class address_access {
+enum class write_status {
   WRITTEN,
   FAILED,
   IGNORED,
@@ -21,7 +21,7 @@ template <typename T>
 concept io_device = requires(const T dev, address a, address r) {
   { dev.read(a, r) } noexcept -> std::same_as<std::byte>;
 } && requires(T dev, address a, address r, std::byte v) {
-  { dev.write(a, r, v) } noexcept -> std::same_as<address_access>;
+  { dev.write(a, r, v) } noexcept -> std::same_as<write_status>;
 };
 
 class device {
@@ -33,13 +33,13 @@ public:
   explicit device(std::shared_ptr<T> ptr);
 
   [[nodiscard]] auto read(address absolute, address relative) const noexcept -> std::byte;
-  [[nodiscard]] auto write(address absolute, address relative, std::byte value) noexcept -> address_access;
+  [[nodiscard]] auto write(address absolute, address relative, std::byte value) noexcept -> write_status;
 
 private:
   struct idevice {
     virtual ~idevice() = default;
     virtual auto read(address, address) const noexcept -> std::byte = 0;
-    virtual auto write(address, address, std::byte) noexcept -> address_access = 0;
+    virtual auto write(address, address, std::byte) noexcept -> write_status = 0;
   };
 
   template <typename T>
@@ -49,7 +49,7 @@ private:
     explicit model(T i) : impl(std::move(i)) {}
 
     auto read(address a, address r) const noexcept -> std::byte override { return impl.read(a, r); }
-    auto write(address a, address r, std::byte v) noexcept -> address_access override { return impl.write(a, r, v); }
+    auto write(address a, address r, std::byte v) noexcept -> write_status override { return impl.write(a, r, v); }
   };
 
 private:

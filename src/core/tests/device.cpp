@@ -22,14 +22,14 @@ using namespace erelic;
 namespace {
 struct io_device_mock {
   std::byte read_ret{0};
-  address_access write_ret{address_access::WRITTEN};
+  write_status write_ret{write_status::WRITTEN};
 
-  explicit io_device_mock(std::byte r = std::byte{0}, address_access w = address_access::WRITTEN) noexcept
+  explicit io_device_mock(std::byte r = std::byte{0}, write_status w = write_status::WRITTEN) noexcept
       : read_ret(r), write_ret(w) {}
 
   [[nodiscard]] auto read(address /*unused*/, address /*unused*/) const noexcept -> std::byte { return read_ret; }
   [[nodiscard]] auto write(address /*unused*/, address /*unused*/, std::byte /*unused*/) const noexcept
-    -> address_access {
+    -> write_status {
     return write_ret;
   }
 };
@@ -48,8 +48,8 @@ struct move_only_device {
     return std::byte{0xAA};
   }
   [[nodiscard]] static auto write(address /*unused*/, address /*unused*/, std::byte /*unused*/) noexcept
-    -> address_access {
-    return address_access::FAILED;
+    -> write_status {
+    return write_status::FAILED;
   }
 };
 
@@ -62,8 +62,8 @@ struct buffer_device {
   explicit buffer_device(std::array<std::byte, N> b) noexcept : buf(std::move(b)) {}
 
   [[nodiscard]] auto read(address a, address /*unused*/) const noexcept -> std::byte { return buf[a.raw]; }
-  [[nodiscard]] auto write(address /*unused*/, address /*unused*/, std::byte /*unused*/) noexcept -> address_access {
-    return address_access::IGNORED;
+  [[nodiscard]] auto write(address /*unused*/, address /*unused*/, std::byte /*unused*/) noexcept -> write_status {
+    return write_status::IGNORED;
   }
 };
 }; // namespace
@@ -76,25 +76,25 @@ TEST(device, read_returns_value_from_impl) {
   EXPECT_EQ(dev.read(abs, rel), std::byte{0x42});
 }
 
-TEST(device, write_returns_address_access_from_impl) {
-  auto mock_fail = io_device_mock{std::byte{0}, address_access::FAILED};
+TEST(device, write_returns_write_status_from_impl) {
+  auto mock_fail = io_device_mock{std::byte{0}, write_status::FAILED};
   auto dev_fail = device{mock_fail};
-  EXPECT_EQ(dev_fail.write(address{0x1234}, address{0x0004}, std::byte{0x7F}), address_access::FAILED);
+  EXPECT_EQ(dev_fail.write(address{0x1234}, address{0x0004}, std::byte{0x7F}), write_status::FAILED);
 
   auto mock_ok = io_device_mock{};
   auto dev_ok = device{mock_ok};
-  EXPECT_EQ(dev_ok.write(address{0xABCD}, address{0x00AB}, std::byte{0x01}), address_access::WRITTEN);
+  EXPECT_EQ(dev_ok.write(address{0xABCD}, address{0x00AB}, std::byte{0x01}), write_status::WRITTEN);
 }
 
 TEST(device, copy_preserves_behavior) {
-  auto mock = io_device_mock{std::byte{0xAB}, address_access::WRITTEN};
+  auto mock = io_device_mock{std::byte{0xAB}, write_status::WRITTEN};
   auto dev1 = device{mock};
   auto dev2 = dev1;
 
   auto a1 = address{0x0011};
   auto r1 = address{0x0022};
   EXPECT_EQ(dev2.read(a1, r1), std::byte{0xAB});
-  EXPECT_EQ(dev2.write(a1, r1, std::byte{0xEE}), address_access::WRITTEN);
+  EXPECT_EQ(dev2.write(a1, r1, std::byte{0xEE}), write_status::WRITTEN);
   EXPECT_EQ(dev1.read(a1, r1), std::byte{0xAB});
 }
 
@@ -112,10 +112,10 @@ TEST(device, write_with_edge_addresses) {
   auto mock = io_device_mock{};
   auto dev = device{mock};
 
-  EXPECT_EQ(dev.write(address{0x0000}, address{0x0000}, std::byte{0x08}), address_access::WRITTEN);
-  EXPECT_EQ(dev.write(address{0x0000}, address{0xFFFF}, std::byte{0x08}), address_access::WRITTEN);
-  EXPECT_EQ(dev.write(address{0xFFFF}, address{0x0000}, std::byte{0x08}), address_access::WRITTEN);
-  EXPECT_EQ(dev.write(address{0xFFFF}, address{0xFFFF}, std::byte{0x08}), address_access::WRITTEN);
+  EXPECT_EQ(dev.write(address{0x0000}, address{0x0000}, std::byte{0x08}), write_status::WRITTEN);
+  EXPECT_EQ(dev.write(address{0x0000}, address{0xFFFF}, std::byte{0x08}), write_status::WRITTEN);
+  EXPECT_EQ(dev.write(address{0xFFFF}, address{0x0000}, std::byte{0x08}), write_status::WRITTEN);
+  EXPECT_EQ(dev.write(address{0xFFFF}, address{0xFFFF}, std::byte{0x08}), write_status::WRITTEN);
 }
 
 TEST(device, read_is_const_and_noexcept) {
@@ -134,7 +134,7 @@ TEST(device, supports_move_only_impl) {
   auto mod = move_only_device{};
   auto dev = device{std::move(mod)};
   EXPECT_EQ(dev.read(address{0}, address{0}), std::byte{0xAA});
-  EXPECT_EQ(dev.write(address{0}, address{0}, std::byte{0}), address_access::FAILED);
+  EXPECT_EQ(dev.write(address{0}, address{0}, std::byte{0}), write_status::FAILED);
 }
 
 namespace {

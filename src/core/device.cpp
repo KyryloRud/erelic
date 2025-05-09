@@ -12,7 +12,7 @@ auto device::read(address absolute, address relative) const noexcept -> std::byt
   return impl->read(absolute, relative);
 }
 
-auto device::write(address absolute, address relative, std::byte value) noexcept -> address_access {
+auto device::write(address absolute, address relative, std::byte value) noexcept -> write_status {
   return impl->write(absolute, relative, value);
 }
 }; // namespace erelic
