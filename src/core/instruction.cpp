@@ -332,7 +332,6 @@ consteval auto make_lookup_table() {
     const auto byte = std::byte{static_cast<std::uint8_t>(index)};
     const auto [op, mode, cycles] = data;
 
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
     table[index] = {
       .opcode = byte,
       .op = op,
@@ -470,7 +469,6 @@ auto operator<<(std::ostream &os, const instruction &instruction) -> std::ostrea
 }
 
 auto as_instruction(std::byte byte, instruction_set set) noexcept -> instruction {
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
   const auto instruction = opcode_lookup_table[std::to_integer<unsigned>(byte)];
 
   if (set == instruction_set::STND && set != instruction.set) {

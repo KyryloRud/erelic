@@ -10,6 +10,8 @@ Checks: >
   portability-*,
   readability-*,
   -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -misc-non-private-member-variables-in-classes,
   -performance-enum-size,
   -readability-identifier-length,
   -readability-magic-numbers
